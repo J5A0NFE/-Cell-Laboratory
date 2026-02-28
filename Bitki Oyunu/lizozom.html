@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🧫 Lysosome Defence - Lizozom Savunması</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0033, #2d1b4e, #4a2c6b);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 1000px;
+            overflow: visible;
+            border: 2px solid #9b59b6;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6, #7d3c98);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.4em;
+            margin-bottom: 5px;
+            color: white;
+            text-shadow: 0 0 20px rgba(155, 89, 182, 0.8);
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .stats-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            flex: 1;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(155, 89, 182, 0.4);
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .game-area {
+            padding: 20px;
+            min-height: 450px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            text-align: center;
+            padding: 20px;
+            color: #e8daef;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 30px;
+            overflow: auto; 
+            padding-top: 50px;
+        }
+
+        h2 {
+            color: #9b59b6;
+            font-size: 2em;
+            margin-bottom: 16px;
+            text-shadow: 0 0 15px rgba(155, 89, 182, 0.6);
+        }
+
+        p {
+            font-size: 1em;
+            line-height: 1.7;
+            margin-bottom: 18px;
+            color: #d2b4de;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.5);
+            margin: 10px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(155, 89, 182, 0.7);
+        }
+        
+        .btn:active { transform: scale(0.95); } 
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(231, 76, 60, 0.7);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 960px;
+            height: 100%; 
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #1a0033 0%, #2d1b4e 50%, #4a2c6b 100%);
+            border-radius: 20px;
+            border: 3px solid #8e44ad;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+            cursor: crosshair;
+            width: 100%;
+            height: 500px;
+        }
+
+        .info-box {
+            background: rgba(155, 89, 182, 0.1);
+            border-left: 5px solid #9b59b6;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #9b59b6;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+        }
+
+        .info-box ul {
+            list-style-position: inside;
+            line-height: 1.9;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .final-score {
+            font-size: 3.5em;
+            color: #f39c12;
+            margin: 18px 0;
+            text-shadow: 0 0 18px rgba(243, 156, 18, 0.8);
+        }
+        .power-up-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+            pointer-events: none;
+            animation: popUp 1s forwards;
+            white-space: nowrap;
+            z-index: 30;
+        }
+
+        @keyframes popUp {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -100%) scale(1); opacity: 0; }
+        }
+
+
+        .controls-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            color: #e8daef;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .game-area { min-height: 400px; }
+            canvas { height: 320px; }
+            .header h1 { font-size: 1.8em; }
+            .stat-item { min-width: 65px; padding: 8px 10px; }
+            .stat-label { font-size: 0.75em; }
+            .stat-value { font-size: 1.4em; }
+            .btn { padding: 12px 24px; font-size: 1em; }
+        }
+        @media (max-width: 480px) {
+            .game-area { min-height: 350px; }
+            canvas { height: 280px; }
+            .header h1 { font-size: 1.6em; }
+            .header .subtitle { font-size: 1em; }
+            .stat-item { min-width: 60px; padding: 6px 8px; }
+            .stat-label { font-size: 0.7em; }
+            .stat-value { font-size: 1.3em; }
+            .btn { padding: 10px 20px; font-size: 0.95em; }
+            .controls-hint { font-size: 0.85em; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🧫 Lysosome Defence 🧫</h1>
+            <div class="subtitle">Hücreyi Toksinlerden Koru!</div>
+            <div class="stats-board">
+                <div class="stat-item">
+                    <div class="stat-label">❤️ HP</div>
+                    <div class="stat-value" id="hpValue">5</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">🏆 Skor</div>
+                    <div class="stat-value" id="scoreValue">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">📊 Level</div>
+                    <div class="stat-value" id="levelValue">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">☣️ Yok Edilen</div>
+                    <div class="stat-value" id="toxinValue">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="startScreen" class="screen">
+                <h2>🛡️ Lizozom Savunması</h2>
+                <p>
+                    <strong>Görevin:</strong> Hücreyi istila eden toksinlerden koru!<br>
+                    Lizozom olarak enzim kapsülleri fırlatıp tehlikeleri yok et!
+                </p>
+                <div class="info-box">
+                    <h3>🎯 Nasıl Oynanır?</h3>
+                    <ul>
+                        <li>🖱️ <strong>Fare</strong> ile nişan al</li>
+                        <li>⌨️ <strong>Tıklayıp Basılı Tut</strong> ile otomatik ateş et</li>
+                        <li>📱 <strong>Mobilde</strong> ekrana basılı tutarak ateş et</li>
+                        <li>☣️ Toksinler sana doğru gelir - onları yok et!</li>
+                        <li>💊 Power-up'ları topla (Rapid Fire, Freeze, Strong Shot)</li>
+                        <li>❤️ 5 HP'in var - dikkatli ol!</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="startGame()">Savunmaya Başla! 🚀</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Lizozom Nedir? 📚</button>
+            </div>
+
+            <div id="infoScreen" class="screen hidden">
+                <h2>🧫 Lizozom Nedir?</h2>
+                <div class="info-box">
+                    <h3>Hücrenin Temizlik Görevlisi</h3>
+                    <ul>
+                        <li>🗑️ <strong>Lizozomlar</strong> hücrenin atık ve toksin yönetim merkezi</li>
+                        <li>🧪 İçinde güçlü <strong>hidrolaz enzimleri</strong> barındırır</li>
+                        <li>⚗️ Asidik ortam (pH ~5) ile zararlıları parçalar</li>
+                        <li>🛡️ Bakterileri, virüsleri ve hasarlı organelleri yok eder</li>
+                        <li>♻️ Otofaji ile hücreyi yeniler</li>
+                        <li>💪 Bağışıklık sisteminin önemli bir parçası</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>⚡ Power-Up'lar</h3>
+                    <ul>
+                        <li>⚡ <strong>Rapid Fire (ATP):</strong> Hızlı otomatik ateş</li>
+                        <li>❄️ <strong>Freeze (pH Drop):</strong> Toksinler yavaşlar</li>
+                        <li>💪 <strong>Strong Shot (Strong Enzyme):</strong> Güçlü tek vuruş</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="showScreen('startScreen')">Geri Dön</button>
+            </div>
+
+            <div id="gameScreen" class="screen hidden">
+                <div class="canvas-wrapper">
+                    <canvas id="gameCanvas"></canvas>
+                    <div class="controls-hint" id="hintText">
+                        Ateş Etmek İçin Basılı Tut! 🖱️/📱
+                    </div>
+                </div>
+            </div>
+
+            <div id="endScreen" class="screen hidden">
+                <h2>💀 Hücre İstila Edildi!</h2>
+                <p style="font-size: 1.2em;">
+                    Lizozom savunması çöktü... 🧫
+                </p>
+                <div class="final-score">
+                    <span id="finalScore">0</span> 🏆
+                </div>
+                <p style="font-size: 1.1em;">
+                    <span id="finalToxins">0</span> Toksin Yok Edildi!
+                </p>
+                <div class="info-box">
+                    <p><strong>🌟 Bilgi:</strong> Gerçek lizozomlar saniyede binlerce molekülü parçalayabilir!</p>
+                </div>
+                <button class="btn" onclick="restartGame()">Tekrar Savun! 🔄</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Daha Fazla Öğren 📚</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            baseWidth: 960,  
+            baseHeight: 500, 
+        };
+        let canvas, ctx;
+        let animationId;
+        let lastTime = 0;
+        let scaleRatio = 1;
+
+        const gameState = {
+            hp: 5,
+            score: 0,
+            level: 1,
+            toxinsKilled: 0,
+            isPlaying: false,
+            isFiring: false,
+            fireTimer: 0,
+            powerUp: null,
+            powerUpTimer: 0
+        };
+        const player = { x: 0, y: 0, r: 25, vx: 2, vy: 2, color: '#9b59b6' };
+        const aim = { x: 0, y: 0 }; 
+        let bullets = [];
+        const BULLET_SPEED = 10;
+        let toxins = [];
+        const TOXIN_TYPES = [
+            { color: '#e74c3c', speed: 2.0, hp: 1, r: 20, emoji: '🦠', score: 10 }, 
+            { color: '#2ecc71', speed: 1.5, hp: 1, r: 15, emoji: '🟢', score: 20 }, 
+            { color: '#8e44ad', speed: 0.4, hp: 3, r: 25, emoji: '🟣', score: 30 }  
+        ];
+        let powerUps = [];
+        const POWER_UP_TYPES = [
+            { type: 'rapid', icon: '⚡', color: '#f39c12' },
+            { type: 'slow', icon: '❄️', color: '#3498db' },
+            { type: 'strong', icon: '💪', color: '#e74c3c' }
+        ];
+        
+        let particles = [];
+        window.onload = () => {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d', { alpha: false });
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            setupInputs();
+            updateUI();
+        };
+
+        function resizeCanvas() {
+            const gameArea = document.querySelector('.game-area');
+            const screenW = gameArea.clientWidth - 40; 
+            const screenH = gameArea.clientHeight - 40;
+            const maxW = 960;
+            const maxH = 500; 
+            const scaleW = screenW / maxW;
+            const scaleH = screenH / maxH;
+            const scale = Math.min(scaleW, scaleH);
+            canvas.width = CONFIG.baseWidth;
+            canvas.height = CONFIG.baseHeight;
+            canvas.style.width = `${CONFIG.baseWidth * scale}px`;
+            canvas.style.height = `${CONFIG.baseHeight * scale}px`;
+            
+            scaleRatio = scale;
+            if (canvas.clientHeight < gameArea.clientHeight - 40 && window.innerWidth < 768) {
+                 canvas.style.height = `${gameArea.clientHeight - 40}px`;
+            }
+        }
+
+        function setupInputs() {
+            const startAction = (e) => {
+                if (!gameState.isPlaying) return;
+                gameState.isFiring = true;
+                updateAim(e);
+            };
+            
+            const endAction = () => {
+                gameState.isFiring = false;
+            };
+
+            const moveAction = (e) => {
+                if (gameState.isPlaying) {
+                    updateAim(e);
+                }
+            };
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startAction(e); }, {passive: false});
+            canvas.addEventListener('touchend', (e) => { e.preventDefault(); endAction(); });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveAction(e); }, {passive: false});
+            canvas.addEventListener('mousedown', startAction);
+            canvas.addEventListener('mouseup', endAction);
+            canvas.addEventListener('mousemove', moveAction);
+            canvas.addEventListener('mouseleave', endAction);
+        }
+
+        function updateAim(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            aim.x = (clientX - rect.left) * (canvas.width / rect.width);
+            aim.y = (clientY - rect.top) * (canvas.height / rect.height);
+        }
+        function startGame() {
+            showScreen('gameScreen');
+            resizeCanvas(); 
+            gameState.hp = 5;
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.toxinsKilled = 0;
+            gameState.isPlaying = true;
+            gameState.isFiring = false;
+            gameState.fireTimer = 0;
+            gameState.powerUp = null;
+            gameState.powerUpTimer = 0;
+            bullets = [];
+            toxins = [];
+            powerUps = [];
+            particles = [];
+            
+            player.x = CONFIG.baseWidth / 2;
+            player.y = CONFIG.baseHeight / 2;
+            for(let i=0; i<3; i++) setTimeout(spawnToxin, i * 500);
+
+            updateUI();
+            
+            lastTime = performance.now();
+            if (animationId) cancelAnimationFrame(animationId);
+            gameLoop(lastTime);
+        }
+
+        function gameLoop(time) {
+            if (!gameState.isPlaying) return;
+
+            const dt = (time - lastTime) / 1000; 
+            lastTime = time;
+
+            update(dt);
+            draw();
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        function update(dt) {
+            if (dt > 0.1) dt = 0.1;
+            player.x += player.vx * (60 * dt);
+            player.y += player.vy * (60 * dt);
+
+            if (player.x < player.r || player.x > CONFIG.baseWidth - player.r) player.vx *= -1;
+            if (player.y < player.r || player.y > CONFIG.baseHeight - player.r) player.vy *= -1;
+
+            player.x = Math.max(player.r, Math.min(CONFIG.baseWidth - player.r, player.x));
+            player.y = Math.max(player.r, Math.min(CONFIG.baseHeight - player.r, player.y));
+            if (Math.random() < 0.002) {
+                const angle = Math.random() * Math.PI * 2;
+                player.vx = Math.cos(angle) * 2;
+                player.vy = Math.sin(angle) * 2;
+            }
+            if (gameState.isFiring) {
+                gameState.fireTimer -= dt;
+                if (gameState.fireTimer <= 0) {
+                    fireBullet();
+                    gameState.fireTimer = gameState.powerUp === 'rapid' ? 0.05 : 0.25;
+                }
+            } else {
+                gameState.fireTimer = 0;
+            }
+            if (gameState.powerUp) {
+                gameState.powerUpTimer -= dt;
+                if (gameState.powerUpTimer <= 0) gameState.powerUp = null;
+            }
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                b.x += b.vx * (60 * dt);
+                b.y += b.vy * (60 * dt);
+                b.r = 6; 
+
+                if (b.x < 0 || b.x > CONFIG.baseWidth || b.y < 0 || b.y > CONFIG.baseHeight) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                let bulletHit = false;
+                for (let j = toxins.length - 1; j >= 0; j--) {
+                    const t = toxins[j];
+                    const dist = Math.hypot(b.x - t.x, b.y - t.y);
+                    if (dist < t.r + b.r) {
+                        t.hp -= (gameState.powerUp === 'strong' ? 3 : 1);
+                        createParticles(b.x, b.y, '#f1c40f', 5);
+                        bulletHit = true;
+
+                        if (t.hp <= 0) {
+                            killToxin(j);
+                        }
+                        break;
+                    }
+                }
+                
+                if (bulletHit) {
+                    bullets.splice(i, 1);
+                }
+            }
+            for (let i = toxins.length - 1; i >= 0; i--) {
+                const t = toxins[i];
+                const dx = player.x - t.x;
+                const dy = player.y - t.y;
+                const dist = Math.hypot(dx, dy);
+                
+                let speed = t.speed;
+                if (gameState.powerUp === 'slow') speed *= 0.4;
+                
+                if (dist > 0) {
+                    t.x += (dx / dist) * speed * (60 * dt);
+                    t.y += (dy / dist) * speed * (60 * dt);
+                }
+                if (dist < player.r + t.r) {
+                    gameState.hp--;
+                    createParticles(player.x, player.y, '#fff', 10);
+                    toxins.splice(i, 1);
+                    canvas.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
+                    setTimeout(() => canvas.style.transform = 'none', 50);
+
+                    updateUI();
+                    
+                    if (gameState.hp <= 0) {
+                        endGame();
+                        return;
+                    }
+                }
+            }
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const p = powerUps[i];
+                if (Math.hypot(p.x - player.x, p.y - player.y) < player.r + p.r) {
+                    activatePowerUp(p.type);
+                    powerUps.splice(i, 1);
+                }
+            }
+            if (Math.random() < (0.01 + gameState.level * 0.003)) {
+                spawnToxin();
+            }
+            gameState.level = Math.floor(gameState.score / 179) + 1;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= dt;
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+        }
+        function draw() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a0033');
+            gradient.addColorStop(0.5, '#2d1b4e');
+            gradient.addColorStop(1, '#4a2c6b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(155, 89, 182, 0.1)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<CONFIG.baseWidth; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i, CONFIG.baseHeight); ctx.stroke(); }
+            for(let i=0; i<CONFIG.baseHeight; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(CONFIG.baseWidth, i); ctx.stroke(); }
+            if (gameState.isFiring) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(aim.x, aim.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            powerUps.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline='middle';
+                ctx.fillText(p.icon, p.x, p.y);
+            });
+            ctx.fillStyle = '#f39c12';
+            bullets.forEach(b => {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#f39c12';
+                ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+            toxins.forEach(t => {
+                ctx.fillStyle = t.color;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = t.color;
+                ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff'; ctx.font = `${t.r}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline='middle';
+                ctx.fillText(t.emoji, t.x, t.y);
+            });
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.fillStyle = player.color;
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = player.color;
+            ctx.beginPath(); ctx.arc(0, 0, player.r, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#e8daef'; ctx.lineWidth = 3; ctx.stroke();
+            const angle = Math.atan2(aim.y - player.y, aim.x - player.x);
+            ctx.rotate(angle);
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.moveTo(10, -5); ctx.lineTo(20, 0); ctx.lineTo(10, 5); ctx.fill();
+            
+            ctx.restore();
+
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🧫', player.x, player.y);
+        }
+        function fireBullet() {
+            const angle = Math.atan2(aim.y - player.y, aim.x - player.x);
+            
+            bullets.push({
+                x: player.x, y: player.y,
+                vx: Math.cos(angle) * BULLET_SPEED,
+                vy: Math.sin(angle) * BULLET_SPEED,
+                r: 6
+            });
+        }
+
+        function spawnToxin() {
+            const types = TOXIN_TYPES;
+            const type = types[Math.floor(Math.random() * types.length)];
+            let x, y;
+            const side = Math.floor(Math.random() * 4);
+            if (side === 0) { x = Math.random()*CONFIG.baseWidth; y = -30; } 
+            else if (side === 1) { x = CONFIG.baseWidth+30; y = Math.random()*CONFIG.baseHeight; } 
+            else if (side === 2) { x = Math.random()*CONFIG.baseWidth; y = CONFIG.baseHeight+30; } 
+            else { x = -30; y = Math.random()*CONFIG.baseHeight; } 
+            const angle = Math.atan2(CONFIG.baseHeight/2 - y, CONFIG.baseWidth/2 - x);
+            
+            toxins.push({
+                x, y,
+                vx: Math.cos(angle), 
+                vy: Math.sin(angle),
+                ...type
+            });
+        }
+
+        function killToxin(idx) {
+            const t = toxins[idx];
+            gameState.score += t.score;
+            gameState.toxinsKilled++;
+            createParticles(t.x, t.y, t.color, 15);
+            if (Math.random() < 0.15) {
+                const p = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
+                powerUps.push({ x: t.x, y: t.y, r: 15, ...p });
+            }
+            
+            toxins.splice(idx, 1);
+            updateUI();
+        }
+
+        function createParticles(x, y, color, count) {
+            for(let i=0; i<count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random()-0.5) * 5,
+                    vy: (Math.random()-0.5) * 5,
+                    life: 1.0,
+                    color: color,
+                    size: Math.random() * 3 + 1
+                });
+            }
+        }
+
+        function activatePowerUp(type) {
+            gameState.powerUp = type;
+            gameState.powerUpTimer = type === 'rapid' ? 5 : 10; 
+            
+            const powerUpType = POWER_UP_TYPES.find(p => p.type === type);
+            const msg = document.createElement('div');
+            msg.className = 'power-up-msg';
+            let text = "";
+            if(type === 'rapid') text = "⚡ HIZLI ATEŞ!";
+            if(type === 'slow') text = "❄️ DONDURMA!";
+            if(type === 'strong') text = "💪 GÜÇLÜ VURUŞ!";
+            msg.innerText = text;
+            document.querySelector('.canvas-wrapper').appendChild(msg);
+            setTimeout(() => msg.remove(), 1000);
+            
+            gameState.score += 50; 
+        }
+        function updateUI() {
+            document.getElementById('hpValue').textContent = gameState.hp;
+            document.getElementById('scoreValue').textContent = gameState.score;
+            document.getElementById('levelValue').textContent = gameState.level;
+            document.getElementById('toxinValue').textContent = gameState.toxinsKilled;
+        }
+        function showScreen(id) {
+            ['startScreen', 'infoScreen', 'gameScreen', 'endScreen'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function showInfo() {
+            showScreen('infoScreen');
+        }
+        function endGame() {
+            gameState.isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalToxins').textContent = gameState.toxinsKilled;
+            showScreen('endScreen');
+        }
+        function restartGame() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            startGame();
+        }
+    </script>
+</body>
+</html>

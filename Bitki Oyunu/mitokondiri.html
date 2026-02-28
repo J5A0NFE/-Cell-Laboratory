@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡ MitoPower - Hücresel Solunum Macerası</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation; 
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100dvh; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            overflow: hidden; 
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 1000px;
+            height: calc(100dvh - 20px); 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #e67e22;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e67e22, #d35400, #c03f1b);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0; 
+        }
+
+        .header h1 {
+            font-size: clamp(1.8em, 4.5vw, 2.4em);
+            margin-bottom: 5px;
+            color: white;
+            text-shadow: 0 0 20px rgba(230, 126, 34, 0.8);
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: clamp(0.9em, 3vw, 1.1em);
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .score-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(230, 126, 34, 0.4);
+        }
+
+        .score-label {
+            font-size: clamp(0.6rem, 2.5vw, 0.8em);
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .score-value {
+            font-size: clamp(1rem, 3.5vw, 1.6em);
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .game-area {
+            padding: 20px;
+            flex-grow: 1; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0; 
+        }
+
+        .screen {
+            text-align: center;
+            padding: 20px;
+            color: #ffe0b2;
+            flex-grow: 1;
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        h2 {
+            color: #e67e22;
+            font-size: clamp(1.8em, 5vw, 2.2em);
+            margin-bottom: 16px;
+            text-shadow: 0 0 15px rgba(230, 126, 34, 0.6);
+        }
+
+        p {
+            font-size: clamp(0.9rem, 3vw, 1em);
+            line-height: 1.7;
+            margin-bottom: 18px;
+            color: #fad7a0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: clamp(1em, 3.5vw, 1.1em);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(230, 126, 34, 0.5);
+            margin: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(230, 126, 34, 0.7);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(52, 152, 219, 0.7);
+        }
+
+        .game-canvas {
+            background: linear-gradient(to bottom, #1a110a 0%, #2d2015 50%, #3e2f23 100%);
+            border-radius: 20px;
+            padding: 16px;
+            position: relative;
+            flex-grow: 1; 
+            min-height: 250px; 
+            border: 3px solid #d35400;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .mito-source {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 50px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 0 25px rgba(243, 156, 18, 0.8);
+            font-size: 13px;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 25px rgba(243, 156, 18, 0.8); }
+            50% { box-shadow: 0 0 45px rgba(243, 156, 18, 1); }
+        }
+
+        .mitochondrion-zone {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, #e67e22, #d35400, #a04000);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            box-shadow: 0 0 35px rgba(230, 126, 34, 0.8), inset 0 0 25px rgba(0, 0, 0, 0.5);
+            border: 4px solid #f39c12;
+            transition: all 0.3s;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .mitochondrion-zone:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 0 55px rgba(230, 126, 34, 1);
+        }
+
+        .mitochondrion-zone.drag-over {
+            transform: translateX(-50%) scale(1.15);
+            box-shadow: 0 0 75px rgba(243, 156, 18, 1), inset 0 0 35px rgba(255, 255, 255, 0.3);
+            background: radial-gradient(circle, #f39c12, #e67e22, #d35400);
+        }
+
+        .mito-text {
+            font-size: 0.3em;
+            margin-top: 8px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        .element {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.3em;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            z-index: 5;
+        }
+
+        .element:hover {
+            z-index: 100;
+        }
+
+        .element:active {
+            cursor: grabbing;
+        }
+
+        .glucose { background: linear-gradient(135deg, #f1c40f, #f39c12); box-shadow: 0 6px 18px rgba(241,196,15,0.6); }
+        .oxygen { background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 6px 18px rgba(52,152,219,0.6); }
+        .waste { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 6px 18px rgba(44,62,80,0.6); }
+
+        .atp-bubble {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            background: radial-gradient(circle, #ffeb3b, #ffc107);
+            border-radius: 50%;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bubbleRise 2s ease-out forwards;
+            pointer-events: none;
+            box-shadow: 0 3px 8px rgba(255, 204, 0, 0.6);
+            color: #1a1a1a;
+            z-index: 20;
+        }
+
+        @keyframes bubbleRise {
+            0% { opacity: 1; transform: translateY(0) scale(0.5); }
+            100% { opacity: 0; transform: translateY(-180px) scale(1.4); }
+        }
+
+        .atp-production {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.92);
+            padding: 35px;
+            border-radius: 28px;
+            box-shadow: 0 0 90px rgba(230, 126, 34, 1);
+            font-size: clamp(1.8em, 5.5vw, 2.3em);
+            font-weight: bold;
+            color: #f39c12;
+            z-index: 1000;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 3px solid #f39c12;
+            animation: glucosePop 1s ease-out forwards;
+        }
+
+        @keyframes glucosePop {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.25) rotate(8deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 25px 35px;
+            border-radius: 18px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            font-size: clamp(1.2em, 4vw, 1.6em);
+            font-weight: bold;
+            color: #fff;
+            z-index: 999;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: message-pop 0.6s ease-out forwards;
+        }
+
+        .message.success { color: #f39c12; border: 2px solid #f39c12; }
+        .message.error { color: #e74c3c; border: 2px solid #e74c3c; }
+        .message.warning { color: #f39c12; border: 2px solid #f39c12; }
+
+        @keyframes message-pop {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            overflow: hidden;
+            margin: 18px 0;
+            border: 2px solid rgba(230, 126, 34, 0.5);
+            flex-shrink: 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f39c12, #e67e22, #d35400);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-box {
+            background: rgba(230, 126, 34, 0.1);
+            border-left: 5px solid #e67e22;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        .info-box h3 {
+            color: #e67e22;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+        }
+
+        .info-box ul {
+            list-style-position: inside;
+            line-height: 1.9;
+            color: #fad7a0;
+        }
+
+        .combo-display {
+            position: absolute;
+            top: 90px;
+            right: 15px;
+            background: rgba(243, 156, 18, 0.9);
+            padding: 12px 20px;
+            border-radius: 18px;
+            font-weight: bold;
+            color: white;
+            font-size: clamp(1.2em, 4vw, 1.4em);
+            box-shadow: 0 0 25px rgba(243, 156, 18, 0.8);
+            animation: comboPulse 0.5s infinite;
+            z-index: 50;
+        }
+
+        @keyframes comboPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .shake {
+            animation: shakeScreen 0.5s;
+        }
+
+        @keyframes shakeScreen {
+            0%, 100% { transform: translate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-6px, -6px); }
+            20%, 40%, 60%, 80% { transform: translate(6px, 6px); }
+        }
+
+        .end-screen h2 {
+            color: #e67e22;
+            font-size: clamp(2em, 6vw, 2.6em);
+            margin-bottom: 16px;
+        }
+
+        .final-score {
+            font-size: clamp(2.8em, 8vw, 3.5em);
+            color: #f39c12;
+            margin: 18px 0;
+            text-shadow: 0 0 18px rgba(243, 156, 18, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>⚡ MitoPower ⚡</h1>
+            <div class="subtitle">Hücresel Solunum Macerası - Yakala ve Üret!</div>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">⏱️ Süre</div>
+                    <div class="score-value" id="timeValue">90</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🍬 Glikoz (1)</div>
+                    <div class="score-value" id="glucoseCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">💨 Oksijen (1)</div>
+                    <div class="score-value" id="oxygenCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">👾 Atık</div>
+                    <div class="score-value" id="wasteCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🔋 ATP</div>
+                    <div class="score-value" id="atpCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🏆 Puan</div>
+                    <div class="score-value" id="scoreValue">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="startScreen" class="screen">
+                <h2>🔥 Mitokondriye Hoş Geldin!</h2>
+                <p>
+                    <strong>Görevin:</strong> Hareketli glikoz ve oksijen moleküllerini yakalayıp mitokondriye sürükle!<br>
+                    <strong>1 ATP = 1 Glikoz + 1 Oksijen</strong>
+                </p>
+                <div class="info-box">
+                    <h3>🎯 Nasıl Oynanır?</h3>
+                    <ul>
+                        <li>🍬 <strong>Glikoz</strong> ve 💨 <strong>Oksijen</strong> sahnede <strong>hızla hareket eder</strong></li>
+                        <li>Onları <strong>sürükleyip</strong> ortadaki MİTOKONDRİ’ye bırak</li>
+                        <li>Her ikisinden de <strong>1’er tane</strong> topla</li>
+                        <li>👾 Atık moleküller <strong>puan düşürür</strong></li>
+                        <li>👾 Atık moleküller <strong>6 sn sonra kaybolur</strong></li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="startGame()">Hücresel Solunuma Başla! 🚀</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Hücresel Solunum Bilgisi 📚</button>
+            </div>
+
+            <div id="infoScreen" class="screen hidden">
+                <h2>⚡ Hücresel Solunum Nedir?</h2>
+                <div class="info-box">
+                    <h3>Gerçek Kimyasal Denklem</h3>
+                    <p style="text-align: center; font-size: 1.4em; margin: 12px 0; font-family: monospace;">
+                        C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP
+                    </p>
+                    <ul>
+                        <li>🍬 <strong>Glikoz</strong> besinlerden gelir</li>
+                        <li>💨 <strong>Oksijen</strong> solunumla alınır</li>
+                        <li>⚡ <strong>ATP</strong> hücrenin enerjisidir</li>
+                        <li>🌫️ <strong>CO₂ ve H₂O</strong> yan ürünlerdir</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>🔬 Mitokondri</h3>
+                    <ul>
+                        <li>🔋 Hücrenin <strong>enerji santralidir</strong></li>
+                        <li>🧬 Kendi <strong>DNA’sı</strong> vardır (evrimsel köken: bakteri)</li>
+                        <li>💪 Kas ve sinir hücrelerinde çok sayıda bulunur</li>
+                        <li>🌍 Hayat için <strong>oksijenli solunum</strong> şarttır!</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="showScreen('startScreen')">Geri Dön</button>
+            </div>
+
+            <div id="gameScreen" class="screen hidden" style="padding: 0;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="timerBar">
+                        <span id="timerText">90s</span>
+                    </div>
+                </div>
+                <div class="game-canvas" id="gameCanvas">
+                    <div class="mito-source">🍬 Glikoz & 💨 Oksijen</div>
+                    <div class="mitochondrion-zone" id="mitochondrionZone">
+                        ⚡
+                        <div class="mito-text">MİTOKONDRİ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="endScreen" class="screen hidden">
+                <h2>🎉 Hücresel Solunum Tamamlandı! 🎉</h2>
+                <p style="font-size: 1.2em;">
+                    Harika bir hücre yöneticisisin! 🔋
+                </p>
+                <div class="final-score">
+                    <span id="finalATP">0</span> ⚡
+                </div>
+                <p style="font-size: 1.1em;">
+                    ATP Molekülü Ürettin!
+                </p>
+                <div style="margin: 18px 0;">
+                    <p style="font-size: 1em;">Toplam Puan: <strong id="finalScore" style="color: #f39c12; font-size: 1.4em;">0</strong></p>
+                </div>
+                <div class="info-box">
+                    <p><strong>🌟 İlginç Bilgi:</strong> Vücudun her saniye trilyonlarca ATP üretir. Mitokondriler olmadan yaşam mümkün değildir!</p>
+                </div>
+                <button class="btn" onclick="restartGame()">Tekrar Oyna! 🔄</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Daha Fazla Öğren 📚</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            time: 90,
+            glucose: 0,
+            oxygen: 0,
+            waste: 0,
+            atp: 0,
+            score: 0,
+            combo: 0,
+            elements: [],
+            dragged: null,
+            timer: null,
+            spawnInterval: 1500,
+            lastSpeedUpdate: 90,
+            baseSpeed: 1.2,
+            gameActive: false,
+            audioContext: null
+        };
+
+        const REQUIRED = 1;
+
+        const elementTypes = [
+            { type: 'glucose', emoji: '🍬', class: 'glucose', points: 10, weight: 4 },
+            { type: 'oxygen', emoji: '💨', class: 'oxygen', points: 10, weight: 4 },
+            { type: 'waste', emoji: '👾', class: 'waste', points: -5, harmful: true, weight: 2 }
+        ];
+
+        function getWeightedRandomElement() {
+            const total = elementTypes.reduce((sum, item) => sum + item.weight, 0);
+            let rand = Math.random() * total;
+            for (const item of elementTypes) {
+                if (rand < item.weight) return item;
+                rand -= item.weight;
+            }
+            return elementTypes[0];
+        }
+
+        function initAudio() {
+            if (!gameState.audioContext) {
+                gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.audioContext) return;
+            const ctx = gameState.audioContext;
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            switch (type) {
+                case 'collect':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.2);
+                    break;
+                case 'wrong':
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(220, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.3);
+                    break;
+                case 'atp':
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            const o = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            o.connect(g);
+                            g.connect(ctx.destination);
+                            o.type = 'sine';
+                            o.frequency.setValueAtTime(440 + i * 80, ctx.currentTime);
+                            g.gain.setValueAtTime(0.2, ctx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                            o.start();
+                            o.stop(ctx.currentTime + 0.3);
+                        }, i * 100);
+                    }
+                    break;
+                case 'energy':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.5);
+                    break;
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('timeValue').textContent = gameState.time;
+            document.getElementById('glucoseCount').textContent = gameState.glucose;
+            document.getElementById('oxygenCount').textContent = gameState.oxygen;
+            document.getElementById('wasteCount').textContent = gameState.waste;
+            document.getElementById('atpCount').textContent = gameState.atp;
+            document.getElementById('scoreValue').textContent = gameState.score;
+        }
+
+        function showScreen(id) {
+            ['startScreen', 'infoScreen', 'gameScreen', 'endScreen'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function showInfo() { showScreen('infoScreen'); }
+
+        let animationFrameId = null;
+        function startPhysics() {
+            if (animationFrameId) return;
+            gameState.gameActive = true;
+            animate();
+        }
+
+        function stopPhysics() {
+            gameState.gameActive = false;
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        function animate() {
+            if (!gameState.gameActive) return;
+            moveElements();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function moveElements() {
+            const canvas = document.getElementById('gameCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const maxX = rect.width - 70;
+            const maxY = rect.height - 70;
+
+            for (let obj of gameState.elements) {
+                if (obj.element === gameState.dragged) continue;  
+                if (!obj.element || !obj.element.parentNode) continue;
+
+                const speedMultiplier = 1 + (90 - gameState.time) * 0.008;
+                const speed = obj.speed * speedMultiplier;
+
+                let x = parseFloat(obj.element.style.left) || 0;
+                let y = parseFloat(obj.element.style.top) || 0;
+
+                x += obj.vx * speed;
+                y += obj.vy * speed;
+
+                if (x <= 0 || x >= maxX) {
+                    obj.vx *= -1;
+                    x = Math.max(0, Math.min(maxX, x));
+                }
+                if (y <= 80 || y >= maxY) {
+                    obj.vy *= -1;
+                    y = Math.max(80, Math.min(maxY, y));
+                }
+
+                obj.element.style.left = x + 'px';
+                obj.element.style.top = y + 'px';
+            }
+        }
+        function setupTouchDrag(el, typeInfo) {
+            let touchId = null;
+            let canvasRect;
+            
+            const onStart = (clientX, clientY) => {
+                const gameObj = gameState.elements.find(e => e.element === el);
+                if (!gameObj) return false;
+
+                gameState.dragged = el; 
+                canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
+                
+                el.style.opacity = '0.6';
+                el.style.zIndex = '100'; 
+
+                const currentObj = gameState.elements.find(o => o.element === el);
+                if (currentObj) {
+                    currentObj.vx = 0;
+                    currentObj.vy = 0;
+                }
+                return true;
+            };
+
+            const onMove = (clientX, clientY) => {
+                if (gameState.dragged !== el || !canvasRect) return;
+                const newX = clientX - canvasRect.left - 32.5; 
+                const newY = clientY - canvasRect.top - 32.5;
+                const maxX = canvasRect.width - 65;
+                const maxY = canvasRect.height - 65;
+                
+                el.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
+                el.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
+                const zone = document.getElementById('mitochondrionZone');
+                const zoneRect = zone.getBoundingClientRect();
+                
+                if (clientX >= zoneRect.left && clientX <= zoneRect.right && 
+                    clientY >= zoneRect.top && clientY <= zoneRect.bottom) {
+                    zone.classList.add('drag-over');
+                } else {
+                    zone.classList.remove('drag-over');
+                }
+            };
+
+            const onEnd = (clientX, clientY) => {
+                if (gameState.dragged !== el) return;
+                el.style.opacity = '1';
+                el.style.zIndex = '5';
+                
+                document.getElementById('mitochondrionZone').classList.remove('drag-over');
+                
+                handleDrop(clientX, clientY, el, typeInfo);
+                gameState.dragged = null;
+            };
+            const onTouchStart = (e) => {
+                const touch = e.changedTouches[0];
+                touchId = touch.identifier;
+                if (onStart(touch.clientX, touch.clientY)) {
+                    e.preventDefault();
+                }
+            };
+
+            const onTouchMove = (e) => {
+                const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId);
+                if (!touch) return;
+                onMove(touch.clientX, touch.clientY);
+                e.preventDefault();
+            };
+
+            const onTouchEnd = (e) => {
+                const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId);
+                if (!touch) return;
+                touchId = null;
+                onEnd(touch.clientX, touch.clientY);
+                e.preventDefault();
+            };
+
+            el.addEventListener('touchstart', onTouchStart, { passive: false });
+            el.addEventListener('touchmove', onTouchMove, { passive: false });
+            el.addEventListener('touchend', onTouchEnd, { passive: false });
+            el.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                if (onStart(e.clientX, e.clientY)) {
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                }
+            });
+
+            const onMouseMove = (e) => onMove(e.clientX, e.clientY);
+            const onMouseUp = (e) => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                onEnd(e.clientX, e.clientY);
+            };
+        }
+
+
+        function handleDrop(clientX, clientY, el, typeInfo) {
+            const zone = document.getElementById('mitochondrionZone');
+            const zoneRect = zone.getBoundingClientRect();
+
+            if (clientX >= zoneRect.left && clientX <= zoneRect.right && 
+                clientY >= zoneRect.top && clientY <= zoneRect.bottom) 
+            {
+                const idx = gameState.elements.findIndex(e => e.element === el);
+                if (idx !== -1) gameState.elements.splice(idx, 1);
+
+                if (typeInfo.harmful) {
+                    handleHarmful(el, typeInfo);
+                } else {
+                    handleCorrect(el, typeInfo.type, typeInfo);
+                }
+                el.remove();
+            } else {
+                const elementData = gameState.elements.find(e => e.element === el);
+                if (elementData) {
+                    elementData.vx = (Math.random() > 0.5 ? 1 : -1) * gameState.baseSpeed;
+                    elementData.vy = (Math.random() > 0.5 ? 1 : -1) * gameState.baseSpeed;
+                }
+                el.style.zIndex = '5';
+            }
+        }
+
+        function spawnElement() {
+            const type = getWeightedRandomElement();
+            const el = document.createElement('div');
+            const id = 'el_' + Date.now() + Math.random();
+
+            el.id = id;
+            el.className = `element ${type.class}`;
+            el.textContent = type.emoji;
+            el.dataset.type = type.type;
+
+            const canvas = document.getElementById('gameCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const maxX = rect.width - 70;
+            const maxY = rect.height - 70;
+            const x = 30 + Math.random() * (maxX - 60);
+            const y = 100 + Math.random() * (maxY - 120);
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+
+            const angle = Math.random() * Math.PI * 2;
+            const baseSpeed = gameState.baseSpeed;
+            const vx = Math.cos(angle) * baseSpeed;
+            const vy = Math.sin(angle) * baseSpeed;
+            setupTouchDrag(el, type);
+
+            canvas.appendChild(el);
+
+            gameState.elements.push({
+                id,
+                type,
+                element: el,
+                vx,
+                vy,
+                speed: baseSpeed
+            });
+
+            if (type.harmful) {
+                setTimeout(() => {
+                    const idx = gameState.elements.findIndex(e => e.id === id);
+                    if (idx !== -1) {
+                        if (el.parentNode) el.remove();
+                        gameState.elements.splice(idx, 1);
+                    }
+                }, 6000);
+            }
+        }
+
+        function handleCorrect(el, type, info) {
+            playSound('collect');
+            if (type === 'glucose') gameState.glucose++;
+            else if (type === 'oxygen') gameState.oxygen++;
+
+            gameState.score += info.points;
+            gameState.combo++;
+
+            createParticles(el, '#f39c12');
+            showMessage(`✅ ${info.emoji} +${info.points}`, 'success');
+            checkATPProduction();
+            updateUI();
+
+            if (gameState.combo >= 5) showCombo();
+        }
+
+        function handleHarmful(el, info) {
+            playSound('wrong');
+            gameState.score = Math.max(0, gameState.score + info.points);
+            gameState.waste++; 
+            gameState.combo = 0;
+            createParticles(el, '#e74c3c');
+            showMessage(`❌ ${info.emoji} ${info.points}`, 'error');
+            document.body.classList.add('shake');
+            setTimeout(() => document.body.classList.remove('shake'), 500);
+            updateUI();
+        }
+
+        function checkATPProduction() {
+            if (gameState.glucose >= REQUIRED && gameState.oxygen >= REQUIRED) {
+                gameState.glucose -= REQUIRED;
+                gameState.oxygen -= REQUIRED;
+                gameState.atp++;
+                gameState.score += 50;
+                playSound('atp');
+                produceATP();
+                produceEnergy();
+                updateUI();
+            }
+        }
+
+        function produceATP() {
+            const div = document.createElement('div');
+            div.className = 'atp-production';
+            div.innerHTML = `🔋 ATP ÜRETİLDİ!<br><div style="font-size:0.5em;margin-top:12px;">C₆H₁₂O₆ + O₂ → ATP + CO₂ + H₂O</div><div style="font-size:0.4em;color:#f39c12;margin-top:8px;">+50 PUAN!</div>`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2000);
+        }
+
+        function produceEnergy() {
+            const zone = document.getElementById('mitochondrionZone');
+            const zRect = zone.getBoundingClientRect();
+            const cRect = document.getElementById('gameCanvas').getBoundingClientRect();
+
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'atp-bubble';
+                    bubble.textContent = '⚡';
+                    bubble.style.left = (zRect.left - cRect.left + zRect.width / 2 - 18) + 'px';
+                    bubble.style.top = (zRect.top - cRect.top + 35) + 'px';
+                    document.getElementById('gameCanvas').appendChild(bubble);
+                    playSound('energy');
+                    setTimeout(() => bubble.remove(), 2000);
+                }, i * 200);
+            }
+        }
+
+        function showCombo() {
+            const existing = document.getElementById('comboDisplay');
+            if (existing) existing.remove();
+            const combo = document.createElement('div');
+            combo.id = 'comboDisplay';
+            combo.className = 'combo-display';
+            combo.textContent = `🔥 COMBO x${gameState.combo}!`;
+            document.getElementById('gameCanvas').appendChild(combo);
+            setTimeout(() => { if (combo.parentNode) combo.remove(); }, 2000);
+        }
+
+        function createParticles(el, color) {
+            const rect = el.getBoundingClientRect();
+            const canvas = document.getElementById('gameCanvas');
+            const cRect = canvas.getBoundingClientRect();
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.backgroundColor = color;
+                p.style.left = (rect.left - cRect.left + 32.5) + 'px';
+                p.style.top = (rect.top - cRect.top + 32.5) + 'px';
+                canvas.appendChild(p);
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 5;
+                let x = parseFloat(p.style.left), y = parseFloat(p.style.top), opacity = 1;
+                const anim = () => {
+                    opacity -= 0.02;
+                    x += Math.cos(angle) * speed;
+                    y += Math.sin(angle) * speed;
+                    p.style.opacity = opacity;
+                    p.style.left = x + 'px';
+                    p.style.top = y + 'px';
+                    if (opacity > 0) requestAnimationFrame(anim);
+                    else p.remove();
+                };
+                requestAnimationFrame(anim);
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        function updateTimer() {
+            gameState.time--;
+
+            if (gameState.time < gameState.lastSpeedUpdate && gameState.time % 10 === 0) {
+                gameState.spawnInterval = Math.max(500, gameState.spawnInterval * 0.85);
+                clearInterval(spawnTimerId);
+                spawnTimerId = setInterval(spawnElement, gameState.spawnInterval);
+                gameState.lastSpeedUpdate = gameState.time;
+            }
+
+            const perc = (gameState.time / 90) * 100;
+            document.getElementById('timerBar').style.width = perc + '%';
+            document.getElementById('timerText').textContent = gameState.time + 's';
+
+            if (gameState.time <= 0) {
+                endGame();
+            }
+        }
+
+        let spawnTimerId = null;
+
+        function startGame() {
+            gameState = {
+                time: 90,
+                glucose: 0,
+                oxygen: 0,
+                waste: 0,
+                atp: 0,
+                score: 0,
+                combo: 0,
+                elements: [],
+                dragged: null,
+                spawnInterval: 1500,
+                lastSpeedUpdate: 90,
+                baseSpeed: 1.2,
+                gameActive: true,
+                audioContext: gameState.audioContext
+            };
+
+            updateUI();
+            showScreen('gameScreen');
+            document.getElementById('gameCanvas').innerHTML = `
+                <div class="mito-source">🍬 Glikoz & 💨 Oksijen</div>
+                <div class="mitochondrion-zone" id="mitochondrionZone">
+                    ⚡
+                    <div class="mito-text">MİTOKONDRİ</div>
+                </div>
+            `;
+
+            initAudio();
+            setupDropZone();
+            startPhysics();
+            spawnElement();
+            spawnTimerId = setInterval(spawnElement, gameState.spawnInterval);
+            gameState.timer = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameState.timer);
+            clearInterval(spawnTimerId);
+            stopPhysics();
+            document.getElementById('finalATP').textContent = gameState.atp;
+            document.getElementById('finalScore').textContent = gameState.score;
+            showScreen('endScreen');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>

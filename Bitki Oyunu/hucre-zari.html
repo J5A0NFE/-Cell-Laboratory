@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Hücre Zabı: Güvenlik ve Ulaşım</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 1000px;
+            overflow: hidden;
+            border: 2px solid #9b59b6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad, #6c3483);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: 2.4em;
+            margin-bottom: 5px;
+            color: white;
+            text-shadow: 0 0 20px rgba(155, 89, 182, 0.8);
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .score-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(155, 89, 182, 0.4);
+        }
+
+        .score-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .score-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .game-area {
+            padding: 20px;
+            min-height: 450px;
+            position: relative;
+        }
+
+        .screen {
+            text-align: center;
+            padding: 20px;
+            color: #d2b4de;
+        }
+
+        h2 {
+            color: #9b59b6;
+            font-size: 2em;
+            margin-bottom: 16px;
+            text-shadow: 0 0 15px rgba(155, 89, 182, 0.6);
+        }
+
+        p {
+            font-size: 1em;
+            line-height: 1.7;
+            margin-bottom: 18px;
+            color: #d7bde2;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.5);
+            margin: 10px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(155, 89, 182, 0.7);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.5);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(46, 204, 113, 0.7);
+        }
+
+        .game-canvas {
+            background: linear-gradient(to bottom, #1a0b2e 0%, #2a144e 50%, #3a1d6e 100%);
+            border-radius: 20px;
+            padding: 16px;
+            position: relative;
+            min-height: 400px;
+            height: calc(100vh - 320px);
+            max-height: 550px;
+            border: 3px solid #8e44ad;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .membrane {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(155, 89, 182, 0.1);
+            border: 4px dashed #9b59b6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .channel {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .channel.pump {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .channel.receptor {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            font-size: 1.5em;
+        }
+
+        #channel1 { top: 30%; left: 50%; transform: translateX(-50%); }
+        #channel2 { top: 50%; right: 15%; transform: translateY(-50%); }
+        #channel3 { bottom: 30%; left: 50%; transform: translateX(-50%); }
+        #channel4 { top: 50%; left: 15%; transform: translateY(-50%); }
+        #channel5 { top: 20%; right: 30%; transform: translate(0, 0); }
+        #channel6 { bottom: 20%; left: 30%; transform: translate(0, 0); }
+
+        .molecule {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            z-index: 5;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        .glucose { background: linear-gradient(135deg, #f1c40f, #f39c12); box-shadow: 0 6px 18px rgba(241,196,15,0.6); }
+        .oxygen { background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 6px 18px rgba(52,152,219,0.6); }
+        .sodium { background: linear-gradient(135deg, #e74c3c, #c0392b); box-shadow: 0 6px 18px rgba(231,76,60,0.6); }
+        .virus { background: linear-gradient(135deg, #2c3e50, #1a252f); box-shadow: 0 6px 18px rgba(0,0,0,0.6); color: #e74c3c; }
+        .signal { background: linear-gradient(135deg, #1abc9c, #16a085); box-shadow: 0 6px 18px rgba(26,188,156,0.6); }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 25px 35px;
+            border-radius: 18px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #fff;
+            z-index: 999;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: message-pop 0.6s ease-out forwards;
+        }
+
+        .message.success { color: #2ecc71; border: 2px solid #2ecc71; }
+        .message.error { color: #e74c3c; border: 2px solid #e74c3c; }
+        .message.warning { color: #f39c12; border: 2px solid #f39c12; }
+
+        @keyframes message-pop {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            overflow: hidden;
+            margin: 18px 0;
+            border: 2px solid rgba(155, 89, 182, 0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9b59b6, #8e44ad, #6c3483);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-box {
+            background: rgba(155, 89, 182, 0.1);
+            border-left: 5px solid #9b59b6;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #9b59b6;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+        }
+
+        .info-box ul {
+            list-style-position: inside;
+            line-height: 1.9;
+            color: #d7bde2;
+        }
+
+        .combo-display {
+            position: absolute;
+            top: 90px;
+            right: 15px;
+            background: rgba(155, 89, 182, 0.9);
+            padding: 12px 20px;
+            border-radius: 18px;
+            font-weight: bold;
+            color: white;
+            font-size: 1.4em;
+            box-shadow: 0 0 25px rgba(155, 89, 182, 0.8);
+            animation: comboPulse 0.5s infinite;
+            z-index: 50;
+        }
+
+        @keyframes comboPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .shake {
+            animation: shakeScreen 0.5s;
+        }
+
+        @keyframes shakeScreen {
+            0%, 100% { transform: translate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-6px, -6px); }
+            20%, 40%, 60%, 80% { transform: translate(6px, 6px); }
+        }
+
+        .end-screen h2 {
+            color: #9b59b6;
+            font-size: 2.6em;
+            margin-bottom: 16px;
+        }
+
+        .final-score {
+            font-size: 3.5em;
+            color: #f39c12;
+            margin: 18px 0;
+            text-shadow: 0 0 18px rgba(243, 156, 18, 0.8);
+        }
+
+        .latin-note {
+            background: rgba(155, 89, 182, 0.15);
+            border-left: 4px solid #af7ac5;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-style: italic;
+            color: #d2b4de;
+            font-size: 0.9em;
+        }
+
+        .gate-effect {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: rgba(46, 204, 113, 0.4);
+            border-radius: 15px;
+            z-index: 9;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🛡️ Hücre Zabı: Güvenlik ve Ulaşım</h1>
+            <div class="subtitle">Doğru maddeleri geçir, tehlikeleri engelle!</div>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">⏱️ Süre</div>
+                    <div class="score-value" id="timeValue">90</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🟢 Gereken</div>
+                    <div class="score-value" id="neededCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🔴 Tehdit</div>
+                    <div class="score-value" id="threatCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">✅ Başarılı</div>
+                    <div class="score-value" id="successCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🏆 Puan</div>
+                    <div class="score-value" id="scoreValue">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="startScreen" class="screen">
+                <h2>🛡️ Hücre Zabı Merkezine Hoş Geldin!</h2>
+                <p>
+                    <strong>Görevin:</strong> Gerekli maddeleri içeri al, tehlikeleri engelle!<br>
+                    Her kanalın <strong>kendi işlevi</strong> var!
+                </p>
+                <div class="latin-note">
+                    <em>“Plazma zarı” → Seçici geçirgenlik sayesinde hücre iç dengesini korur</em>
+                </div>
+                <div class="info-box">
+                    <h3>🎯 Nasıl Oynanır?</h3>
+                    <ul>
+                        <li>🧫 <strong>Glikoz</strong> → <strong>kolaylaştırılmış difüzyon</strong> kanalı</li>
+                        <li>💨 <strong>Oksijen</strong> → <strong>basit difüzyon</strong> (zardan direk geçer)</li>
+                        <li>🧂 <strong>Sodyum</strong> → <strong>aktif taşıma</strong> (pompa ile)</li>
+                        <li>⚠️ <strong>Virüs</strong> → <strong>engellenmeli!</strong></li>
+                        <li>📡 <strong>Sinyal</strong> → <strong>reseptöre</strong> bağlanmalı</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="startGame()">Görev Başlasın! 🛑</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Hücre Zabı Bilgisi 📚</button>
+            </div>
+
+            <div id="infoScreen" class="screen hidden">
+                <h2>🛡️ Hücre Zabı Nedir?</h2>
+                <div class="info-box">
+                    <h3>Seçici Geçirgenlik</h3>
+                    <ul>
+                        <li>🧬 <strong>Fosfolipid çift tabakası</strong> suyu geçirir, yağda çözünenleri kolay geçirir</li>
+                        <li>🚪 <strong>Kanal proteinleri</strong> özel maddeler için kapı görevi görür</li>
+                        <li>🔋 <strong>Pompa proteinleri</strong> ATP harcayarak aktif taşıma yapar</li>
+                        <li>📡 <strong>Reseptörler</strong> sinyal moleküllerini algılar</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>Geçiş Türleri</h3>
+                    <ul>
+                        <li>🟢 <strong>Basit Difüzyon:</strong> O₂, CO₂ (zardan doğrudan)</li>
+                        <li>🟡 <strong>Kolaylaştırılmış Difüzyon:</strong> Glikoz, iyonlar (kanal ile)</li>
+                        <li>🔴 <strong>Aktif Taşıma:</strong> Sodyum-potasyum pompası (ATP ile)</li>
+                        <li>🧬 <strong>Endositoz:</strong> Büyük moleküller için (oyunda simüle edildi)</li>
+                    </ul>
+                </div>
+                <div class="latin-note">
+                    <em>“Zar” → Hücreyi çevreleyen, içeriğini koruyan, ancak iletişim kuran dinamik bariyer</em>
+                </div>
+                <button class="btn" onclick="showScreen('startScreen')">Geri Dön</button>
+            </div>
+
+            <div id="gameScreen" class="screen hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="timerBar">
+                        <span id="timerText">90s</span>
+                    </div>
+                </div>
+                <div class="game-canvas" id="gameCanvas">
+                    <div class="membrane"></div>
+                    <div class="channel" id="channel1">Glikoz</div>
+                    <div class="channel pump" id="channel2">Na⁺/K⁺</div>
+                    <div class="channel" id="channel3">O₂/CO₂</div>
+                    <div class="channel" id="channel4">İyonlar</div>
+                    <div class="channel receptor" id="channel5">📡</div>
+                    <div class="channel receptor" id="channel6">📡</div>
+                </div>
+            </div>
+
+            <div id="endScreen" class="screen hidden">
+                <h2>🎉 Güvenlik Başarılı! 🎉</h2>
+                <p style="font-size: 1.2em;">
+                    Hücreyi mükemmel korudun! 🛡️
+                </p>
+                <div class="final-score">
+                    <span id="finalSuccess">0</span> ✅
+                </div>
+                <p style="font-size: 1.1em;">
+                    Doğru Karar Verdin!
+                </p>
+                <div style="margin: 18px 0;">
+                    <p style="font-size: 1em;">Toplam Puan: <strong id="finalScore" style="color: #f39c12; font-size: 1.4em;">0</strong></p>
+                </div>
+                <div class="info-box">
+                    <p><strong>🌟 İlginç Bilgi:</strong> Hücre zarı sadece 7-10 nanometre kalınlığındadır ama hayati işlevleri vardır!</p>
+                </div>
+                <button class="btn" onclick="restartGame()">Tekrar Oyna! 🔄</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Daha Fazla Öğren 📚</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            time: 90,
+            needed: 0,
+            threat: 0,
+            success: 0,
+            score: 0,
+            combo: 0,
+            molecules: [],
+            dragged: null,
+            timer: null,
+            spawnInterval: 1500,
+            lastSpeedUpdate: 90,
+            gameActive: false
+        };
+
+        const moleculeTypes = [
+            { type: 'glucose', emoji: '🧫', class: 'glucose', points: 10, weight: 3 },
+            { type: 'oxygen', emoji: '💨', class: 'oxygen', points: 8, weight: 3 },
+            { type: 'sodium', emoji: '🧂', class: 'sodium', points: 12, weight: 2 },
+            { type: 'virus', emoji: '🦠', class: 'virus', points: -15, harmful: true, weight: 1 },
+            { type: 'signal', emoji: '📡', class: 'signal', points: 15, weight: 1 }
+        ];
+
+        function getWeightedRandomMolecule() {
+            const total = moleculeTypes.reduce((sum, item) => sum + item.weight, 0);
+            let rand = Math.random() * total;
+            for (const item of moleculeTypes) {
+                if (rand < item.weight) return item;
+                rand -= item.weight;
+            }
+            return moleculeTypes[0];
+        }
+
+        function updateUI() {
+            document.getElementById('timeValue').textContent = gameState.time;
+            document.getElementById('neededCount').textContent = gameState.needed;
+            document.getElementById('threatCount').textContent = gameState.threat;
+            document.getElementById('successCount').textContent = gameState.success;
+            document.getElementById('scoreValue').textContent = gameState.score;
+        }
+
+        function showScreen(id) {
+            ['startScreen', 'infoScreen', 'gameScreen', 'endScreen'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function showInfo() { showScreen('infoScreen'); }
+
+        function createGateEffect(x, y, color = '#2ecc71') {
+            const effect = document.createElement('div');
+            effect.className = 'gate-effect';
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            effect.style.background = `rgba(${color === '#2ecc71' ? '46,204,113' : '231,76,60'}, 0.5)`;
+            document.getElementById('gameCanvas').appendChild(effect);
+            effect.animate([
+                { opacity: 0.7, transform: 'scale(1)' },
+                { opacity: 0, transform: 'scale(1.5)' }
+            ], { duration: 600 });
+            setTimeout(() => effect.remove(), 600);
+        }
+
+        function spawnMolecule() {
+            if (!gameState.gameActive) return;
+            const type = getWeightedRandomMolecule();
+            const el = document.createElement('div');
+            const id = 'mol_' + Date.now() + Math.random();
+
+            el.id = id;
+            el.className = `molecule ${type.class}`;
+            el.textContent = type.emoji;
+            el.dataset.type = type.type;
+            el.draggable = true;
+
+            const canvas = document.getElementById('gameCanvas');
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            if (side === 0) { x = Math.random() * (canvas.offsetWidth - 60); y = -60; }
+            else if (side === 1) { x = canvas.offsetWidth + 60; y = Math.random() * (canvas.offsetHeight - 60); }
+            else if (side === 2) { x = Math.random() * (canvas.offsetWidth - 60); y = canvas.offsetHeight + 60; }
+            else { x = -60; y = Math.random() * (canvas.offsetHeight - 60); }
+
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+
+            el.addEventListener('dragstart', (e) => {
+                gameState.dragged = el;
+                el.style.opacity = '0.6';
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            el.addEventListener('dragend', () => {
+                el.style.opacity = '1';
+                gameState.dragged = null;
+                setTimeout(() => {
+                    if (el.parentNode) el.remove();
+                }, 10000);
+            });
+
+            canvas.appendChild(el);
+            gameState.molecules.push({ id, type, element: el });
+
+            if (type.harmful) {
+                setTimeout(() => {
+                    const idx = gameState.molecules.findIndex(m => m.id === id);
+                    if (idx !== -1) {
+                        if (el.parentNode) el.remove();
+                        gameState.molecules.splice(idx, 1);
+                    }
+                }, 8000);
+            }
+        }
+
+        function setupChannels() {
+            const channels = document.querySelectorAll('.channel');
+            channels.forEach(channel => {
+                channel.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    channel.style.transform = 'scale(1.1)';
+                    channel.style.boxShadow = '0 8px 20px rgba(0,0,0,0.6)';
+                });
+                channel.addEventListener('dragleave', () => {
+                    channel.style.transform = 'scale(1)';
+                    channel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+                });
+                channel.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    channel.style.transform = 'scale(1)';
+                    channel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+
+                    if (!gameState.dragged) return;
+
+                    const el = gameState.dragged;
+                    const molType = el.dataset.type;
+                    const channelId = channel.id;
+                    let correct = false;
+
+                    // Kanal kuralları
+                    if (molType === 'glucose' && channelId === 'channel1') correct = true;
+                    else if (molType === 'sodium' && channelId === 'channel2') correct = true;
+                    else if (molType === 'oxygen' && channelId === 'channel3') correct = true;
+                    else if (molType === 'signal' && (channelId === 'channel5' || channelId === 'channel6')) correct = true;
+                    else if (molType === 'virus') {
+                        // Virüs her yere yanlış
+                        correct = false;
+                    } else if (channelId === 'channel3' && (molType === 'glucose' || molType === 'sodium')) {
+                        // O₂/CO₂ kanalı sadece gazlar için
+                        correct = false;
+                    } else if (channelId !== 'channel3' && molType === 'oxygen') {
+                        // Oksijen sadece difüzyon kanalından geçer
+                        correct = false;
+                    }
+
+                    const typeInfo = moleculeTypes.find(t => t.type === molType);
+                    const rect = channel.getBoundingClientRect();
+                    const canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
+                    const x = rect.left - canvasRect.left + rect.width / 2 - 30;
+                    const y = rect.top - canvasRect.top + rect.height / 2 - 15;
+
+                    if (correct && !typeInfo.harmful) {
+                        gameState.success++;
+                        gameState.score += typeInfo.points;
+                        gameState.combo++;
+                        createGateEffect(x, y, '#2ecc71');
+                        showMessage(`✅ ${typeInfo.emoji} doğru kanala gönderildi!`, 'success');
+                    } else if (typeInfo.harmful) {
+                        gameState.threat++;
+                        gameState.score = Math.max(0, gameState.score - 15);
+                        gameState.combo = 0;
+                        createGateEffect(x, y, '#e74c3c');
+                        showMessage(`❌ Virüs geçti! Güvenlik ihlali!`, 'error');
+                    } else {
+                        gameState.score = Math.max(0, gameState.score - 5);
+                        showMessage(`⚠️ Yanlış kanal!`, 'warning');
+                    }
+
+                    el.remove();
+                    gameState.dragged = null;
+                    updateUI();
+
+                    if (gameState.combo >= 5) showCombo();
+                });
+            });
+        }
+
+        function showCombo() {
+            const existing = document.getElementById('comboDisplay');
+            if (existing) existing.remove();
+            const combo = document.createElement('div');
+            combo.id = 'comboDisplay';
+            combo.className = 'combo-display';
+            combo.textContent = `🔥 COMBO x${gameState.combo}!`;
+            document.getElementById('gameCanvas').appendChild(combo);
+            setTimeout(() => { if (combo.parentNode) combo.remove(); }, 2000);
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        function updateTimer() {
+            gameState.time--;
+
+            if (gameState.time < gameState.lastSpeedUpdate && gameState.time % 10 === 0) {
+                gameState.spawnInterval = Math.max(500, gameState.spawnInterval * 0.85);
+                clearInterval(spawnTimerId);
+                spawnTimerId = setInterval(spawnMolecule, gameState.spawnInterval);
+                gameState.lastSpeedUpdate = gameState.time;
+            }
+
+            const perc = (gameState.time / 90) * 100;
+            document.getElementById('timerBar').style.width = perc + '%';
+            document.getElementById('timerText').textContent = gameState.time + 's';
+
+            if (gameState.time <= 0) {
+                endGame();
+            }
+        }
+
+        let spawnTimerId = null;
+
+        function startGame() {
+            gameState = {
+                time: 90,
+                needed: 0,
+                threat: 0,
+                success: 0,
+                score: 0,
+                combo: 0,
+                molecules: [],
+                dragged: null,
+                spawnInterval: 1500,
+                lastSpeedUpdate: 90,
+                gameActive: true
+            };
+
+            updateUI();
+            showScreen('gameScreen');
+
+            const canvas = document.getElementById('gameCanvas');
+            canvas.innerHTML = `
+                <div class="membrane"></div>
+                <div class="channel" id="channel1">Glikoz</div>
+                <div class="channel pump" id="channel2">Na⁺/K⁺</div>
+                <div class="channel" id="channel3">O₂/CO₂</div>
+                <div class="channel" id="channel4">İyonlar</div>
+                <div class="channel receptor" id="channel5">📡</div>
+                <div class="channel receptor" id="channel6">📡</div>
+            `;
+
+            setupChannels();
+            spawnMolecule();
+            spawnTimerId = setInterval(spawnMolecule, gameState.spawnInterval);
+            gameState.timer = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameState.timer);
+            clearInterval(spawnTimerId);
+            document.getElementById('finalSuccess').textContent = gameState.success;
+            document.getElementById('finalScore').textContent = gameState.score;
+            showScreen('endScreen');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>

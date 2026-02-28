@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧬 Ribozom: Protein Yapımcısı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            padding: 10px;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            box-shadow: 0 16px 60px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 2px solid #3498db;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3498db, #2980b9, #1f618d);
+            padding: 18px 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: 1.9em;
+            margin-bottom: 6px;
+            color: white;
+            text-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 9px 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            flex: 1;
+            min-width: 70px;
+            max-width: 110px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .score-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+
+        .score-label {
+            font-size: 0.75em;
+            opacity: 0.9;
+            margin-bottom: 3px;
+        }
+
+        .score-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .game-area {
+            padding: 16px;
+            position: relative;
+        }
+
+        .screen {
+            text-align: center;
+            padding: 16px;
+            color: #d6eaf8;
+        }
+
+        h2 {
+            color: #3498db;
+            font-size: 1.7em;
+            margin-bottom: 14px;
+            text-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+        }
+
+        p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: #aed6f1;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+            margin: 8px 4px;
+            font-weight: 600;
+            min-width: 160px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.7);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.7);
+        }
+
+        .game-canvas {
+            background: linear-gradient(to bottom, #0d1b2a 0%, #1b263b 50%, #283747 100%);
+            border-radius: 18px;
+            padding: 14px;
+            position: relative;
+            min-height: 320px;
+            height: auto;
+            max-height: 500px;
+            border: 2px solid #2980b9;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .mrna-strip {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 45px;
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1a1a1a;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+            font-size: 12px;
+            z-index: 20;
+        }
+
+        .ribosome-zone {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, #3498db, #2980b9, #1a5276);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 3px solid #5dade2;
+            transition: all 0.3s;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .ribosome-zone:hover {
+            transform: translateX(-50%) scale(1.08);
+            box-shadow: 0 0 45px rgba(52, 152, 219, 1);
+        }
+
+        .ribosome-zone.drag-over {
+            transform: translateX(-50%) scale(1.12);
+            box-shadow: 0 0 60px rgba(52, 152, 219, 1), inset 0 0 30px rgba(255,255,255,0.3);
+            background: radial-gradient(circle, #5dade2, #3498db, #2980b9);
+        }
+
+        .ribo-text {
+            font-size: 0.35em;
+            margin-top: 6px;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        .element {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+        }
+
+        .element:hover {
+            z-index: 100;
+        }
+
+        .element:active, .element.dragging {
+            cursor: grabbing;
+            z-index: 1000; 
+            opacity: 0.7;
+        }
+        .element {
+             transition: none;
+        }
+
+
+        .amino { background: linear-gradient(135deg, #2ecc71, #27ae60); box-shadow: 0 5px 15px rgba(46,204,113,0.6); }
+        .stop { background: linear-gradient(135deg, #e74c3c, #c0392b); box-shadow: 0 5px 15px rgba(231,76,60,0.6); }
+        .junk { background: linear-gradient(135deg, #8e44ad, #6c3483); box-shadow: 0 5px 15px rgba(142,68,173,0.6); }
+
+        .protein-chain {
+            position: absolute;
+            bottom: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 15;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .chain-item {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            z-index: 999;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: message-pop 0.6s ease-out forwards;
+        }
+
+        .message.success { color: #2ecc71; border: 2px solid #2ecc71; }
+        .message.error { color: #e74c3c; border: 2px solid #e74c3c; }
+        .message.warning { color: #f39c12; border: 2px solid #f39c12; }
+
+        @keyframes message-pop {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 11px;
+            overflow: hidden;
+            margin: 14px 0;
+            border: 2px solid rgba(52, 152, 219, 0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9, #1f618d);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-box {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid #3498db;
+            padding: 16px;
+            margin: 14px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(8px);
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .info-box ul {
+            padding-left: 20px;
+            line-height: 1.8;
+            color: #aed6f1;
+        }
+
+        .combo-display {
+            position: absolute;
+            top: 80px;
+            right: 12px;
+            background: rgba(52, 152, 219, 0.9);
+            padding: 10px 16px;
+            border-radius: 16px;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2em;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
+            animation: comboPulse 0.5s infinite;
+            z-index: 50;
+        }
+
+        @keyframes comboPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .shake {
+            animation: shakeScreen 0.5s;
+        }
+
+        @keyframes shakeScreen {
+            0%, 100% { transform: translate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-5px, -5px); }
+            20%, 40%, 60%, 80% { transform: translate(5px, 5px); }
+        }
+
+        .end-screen h2 {
+            color: #3498db;
+            font-size: 2.2em;
+            margin-bottom: 14px;
+        }
+
+        .final-score {
+            font-size: 2.8em;
+            color: #f39c12;
+            margin: 16px 0;
+            text-shadow: 0 0 15px rgba(243, 156, 18, 0.8);
+        }
+
+        .latin-note {
+            background: rgba(52, 152, 219, 0.15);
+            border-left: 4px solid #5dade2;
+            padding: 10px;
+            margin: 12px 0;
+            border-radius: 8px;
+            font-style: italic;
+            color: #d6eaf8;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🧬 Ribozom: Protein Yapımcısı</h1>
+            <div class="subtitle">Aminoasitleri doğru sırayla birleştir!</div>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">⏱️ Süre</div>
+                    <div class="score-value" id="timeValue">45</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🧫 Aminoasit</div>
+                    <div class="score-value" id="aminoCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🛑 STOP Kodonu</div>
+                    <div class="score-value" id="stopCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🧬 Protein</div>
+                    <div class="score-value" id="proteinCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🏆 Puan</div>
+                    <div class="score-value" id="scoreValue">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="startScreen" class="screen">
+                <h2>🧬 Ribozom Fabrikasına Hoş Geldin!</h2>
+                <p>
+                    <strong>Görevin:</strong> Aminoasitleri doğru sırayla ribozoma yerleştirip <strong>protein üret!</strong><br>
+                    <strong>Protein = Aminoasit Zinciri + STOP Kodonu</strong>
+                </p>
+                <div class="latin-note">
+                    <em>“Ribosom” → RNA + protein → hücrenin protein sentez makinesi</em>
+                </div>
+                <div class="info-box">
+                    <h3>🎯 Nasıl Oynanır?</h3>
+                    <ul>
+                        <li>🧫 <strong>Aminoasitleri</strong> sürükleyip ribozoma bırak → zincire eklenir</li>
+                        <li>🛑 <strong>STOP kodonu</strong> geldiğinde → protein tamamlanır</li>
+                        <li>👾 <strong>Sahte kodonlar</strong> (atık) puan kaybettirir</li>
+                        <li>💡 Protein tamamlandıkça <strong>puan ve combo</strong> artar!</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="startGame()">Protein Sentezine Başla! 🧪</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Ribozom Bilgisi 📚</button>
+            </div>
+
+            <div id="infoScreen" class="screen hidden">
+                <h2>🧬 Ribozom Nedir?</h2>
+                <div class="info-box">
+                    <h3>Hücrenin Protein Fabrikası</h3>
+                    <ul>
+                        <li>🧬 <strong>mRNA</strong> talimatına göre aminoasitleri birleştirir</li>
+                        <li>🧫 20 farklı aminoasit → sonsuz protein çeşidi</li>
+                        <li>🛑 <strong>STOP kodonu</strong> proteinin sonunu işaretler</li>
+                        <li>🔬 Tüm canlılarda (bakteriye kadar) benzer yapıda!</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>Protein Sentezi Adımları</h3>
+                    <ul>
+                        <li>1️⃣ mRNA çekirdekten ribozoma gelir</li>
+                        <li>2️⃣ tRNA aminoasitleri getirir</li>
+                        <li>3️⃣ Ribozom aminoasitleri peptit bağıyla birleştirir</li>
+                        <li>4️⃣ STOP kodonu gelince protein serbest bırakılır</li>
+                    </ul>
+                </div>
+                <div class="latin-note">
+                    <em>“Amino” = azot içeren | “Asit” = karboksil grubu → protein yapı taşı</em>
+                </div>
+                <button class="btn" onclick="showScreen('startScreen')">Geri Dön</button>
+            </div>
+
+            <div id="gameScreen" class="screen hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="timerBar">
+                        <span id="timerText">45s</span>
+                    </div>
+                </div>
+                <div class="game-canvas" id="gameCanvas">
+                    <div class="mrna-strip">🧬 mRNA Talimatı</div>
+                    <div class="protein-chain" id="proteinChain"></div>
+                    <div class="ribosome-zone" id="ribosomeZone">
+                        🧬
+                        <div class="ribo-text">RİBOZOM</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="endScreen" class="screen hidden">
+                <h2>🎉 Protein Sentezi Tamamlandı! 🎉</h2>
+                <p style="font-size: 1.1em;">
+                    Harika bir moleküler biyologsın! 🧪
+                </p>
+                <div class="final-score">
+                    <span id="finalProtein">0</span> 🧬
+                </div>
+                <p style="font-size: 1em;">
+                    Fonksiyonel Protein Ürettin!
+                </p>
+                <div style="margin: 16px 0;">
+                    <p style="font-size: 1em;">Toplam Puan: <strong id="finalScore" style="color: #f39c12; font-size: 1.3em;">0</strong></p>
+                </div>
+                <div class="info-box">
+                    <p><strong>🌟 İlginç Bilgi:</strong> İnsan vücudunda 20.000+ farklı protein vardır. Ribozomlar saniyede 2-20 aminoasit ekleyebilir!</p>
+                </div>
+                <button class="btn" onclick="restartGame()">Tekrar Oyna! 🔄</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Daha Fazla Öğren 📚</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            time: 45,
+            amino: 0,
+            stop: 0,
+            protein: 0,
+            score: 0,
+            combo: 0,
+            chain: [],
+            elements: [],
+            dragged: null,
+            timer: null,
+            spawnInterval: 1500,
+            lastSpeedUpdate: 45,
+            baseSpeed: 1.2,
+            gameActive: false,
+            audioContext: null
+        };
+
+        const elementTypes = [
+            { type: 'amino', emoji: '🧫', class: 'amino', points: 8, weight: 5 },
+            { type: 'stop', emoji: '🛑', class: 'stop', points: 0, weight: 2 },
+            { type: 'junk', emoji: '👾', class: 'junk', points: -10, harmful: true, weight: 1 }
+        ];
+
+        function getWeightedRandomElement() {
+            const total = elementTypes.reduce((sum, item) => sum + item.weight, 0);
+            let rand = Math.random() * total;
+            for (const item of elementTypes) {
+                if (rand < item.weight) return item;
+                rand -= item.weight;
+            }
+            return elementTypes[0];
+        }
+
+        function updateUI() {
+            document.getElementById('aminoCount').textContent = gameState.amino;
+            document.getElementById('stopCount').textContent = gameState.stop;
+            document.getElementById('proteinCount').textContent = gameState.protein;
+            document.getElementById('scoreValue').textContent = gameState.score;
+        }
+
+        function showScreen(id) {
+            ['startScreen', 'infoScreen', 'gameScreen', 'endScreen'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function showInfo() { showScreen('infoScreen'); }
+
+        let animationFrameId = null;
+        function startPhysics() {
+            if (animationFrameId) return;
+            gameState.gameActive = true;
+            animate();
+        }
+
+        function stopPhysics() {
+            gameState.gameActive = false;
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        function animate() {
+            if (!gameState.gameActive) return;
+            moveElements();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function moveElements() {
+            const canvas = document.getElementById('gameCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const maxX = rect.width - 65;
+            const maxY = rect.height - 65;
+
+            for (let obj of gameState.elements) {
+                if (!obj.element || !obj.element.parentNode) continue;
+                if (obj.element.classList.contains('dragging')) continue; 
+
+                const speedMultiplier = 1 + (45 - gameState.time) * 0.008;
+                const speed = obj.speed * speedMultiplier;
+
+                let x = parseFloat(obj.element.style.left) || 0;
+                let y = parseFloat(obj.element.style.top) || 0;
+
+                x += obj.vx * speed;
+                y += obj.vy * speed;
+
+                if (x <= 0 || x >= maxX) {
+                    obj.vx *= -1;
+                    x = Math.max(0, Math.min(maxX, x));
+                }
+                if (y <= 80 || y >= maxY) {
+                    obj.vy *= -1;
+                    y = Math.max(80, Math.min(maxY, y));
+                }
+
+                obj.element.style.left = x + 'px';
+                obj.element.style.top = y + 'px';
+            }
+        }
+        let offset = { x: 0, y: 0 };
+        const dropZone = () => document.getElementById('ribosomeZone');
+        const gameCanvas = () => document.getElementById('gameCanvas');
+
+        function startDrag(e) {
+            if (e.pointerType === 'touch' && e.touches && e.touches.length > 1) return;
+            
+            e.preventDefault();
+            const el = e.target.closest('.element');
+            if (!el) return;
+
+            gameState.dragged = el;
+            el.classList.add('dragging');
+            const rect = el.getBoundingClientRect();
+            offset.x = (e.clientX || e.touches[0].clientX) - rect.left;
+            offset.y = (e.clientY || e.touches[0].clientY) - rect.top;
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup', onEnd);
+            document.addEventListener('touchend', onEnd); 
+            document.addEventListener('touchcancel', onEnd);
+            checkDropZoneInterval = setInterval(checkDropZone, 50);
+        }
+
+        function onMove(e) {
+            if (!gameState.dragged) return;
+
+            e.preventDefault();
+            const el = gameState.dragged;
+            const canvasRect = gameCanvas().getBoundingClientRect();
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : e.clientX);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : e.clientY);
+            let newLeft = clientX - canvasRect.left - offset.x;
+            let newTop = clientY - canvasRect.top - offset.y;
+            const maxX = canvasRect.width - el.offsetWidth;
+            const maxY = canvasRect.height - el.offsetHeight;
+
+            newLeft = Math.max(0, Math.min(maxX, newLeft));
+            newTop = Math.max(0, Math.min(maxY, newTop));
+
+            el.style.left = newLeft + 'px';
+            el.style.top = newTop + 'px';
+        }
+        
+        let checkDropZoneInterval = null;
+        function checkDropZone() {
+            if (!gameState.dragged) return;
+
+            const elRect = gameState.dragged.getBoundingClientRect();
+            const zoneRect = dropZone().getBoundingClientRect();
+            const isOver = !(
+                elRect.right < zoneRect.left || 
+                elRect.left > zoneRect.right || 
+                elRect.bottom < zoneRect.top || 
+                elRect.top > zoneRect.bottom
+            );
+
+            dropZone().classList.toggle('drag-over', isOver);
+        }
+
+        function onEnd(e) {
+            if (!gameState.dragged) return;
+
+            clearInterval(checkDropZoneInterval);
+            
+            const el = gameState.dragged;
+            el.classList.remove('dragging');
+            dropZone().classList.remove('drag-over');
+            const elRect = el.getBoundingClientRect();
+            const zoneRect = dropZone().getBoundingClientRect();
+
+            const isDroppedInZone = !(
+                elRect.right < zoneRect.left || 
+                elRect.left > zoneRect.right || 
+                elRect.bottom < zoneRect.top || 
+                elRect.top > zoneRect.bottom
+            );
+
+            if (isDroppedInZone) {
+                
+                handleDrop(el);
+            } else {
+                
+                el.style.opacity = '1';
+            }
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', onEnd);
+            document.removeEventListener('touchend', onEnd); 
+            document.removeEventListener('touchcancel', onEnd);
+            
+            gameState.dragged = null;
+        }
+
+        function handleDrop(el) {
+            const type = el.dataset.type;
+            const typeInfo = elementTypes.find(t => t.type === type);
+
+            const idx = gameState.elements.findIndex(e => e.element === el);
+            if (idx !== -1) {
+                gameState.elements.splice(idx, 1);
+            }
+
+            if (typeInfo.harmful) {
+                handleHarmful(el, typeInfo);
+            } else {
+                handleCorrect(el, type, typeInfo);
+            }
+
+            el.remove();
+        }
+
+        function spawnElement() {
+            const type = getWeightedRandomElement();
+            const el = document.createElement('div');
+            const id = 'el_' + Date.now() + Math.random();
+
+            el.id = id;
+            el.className = `element ${type.class}`;
+            el.textContent = type.emoji;
+            el.dataset.type = type.type;
+            el.addEventListener('pointerdown', startDrag);
+
+            const canvas = document.getElementById('gameCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const maxX = rect.width - 65;
+            const maxY = rect.height - 65;
+            const x = 20 + Math.random() * (maxX - 40);
+            const y = 100 + Math.random() * (maxY - 120);
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+
+            const angle = Math.random() * Math.PI * 2;
+            const baseSpeed = gameState.baseSpeed;
+            const vx = Math.cos(angle) * baseSpeed;
+            const vy = Math.sin(angle) * baseSpeed;
+
+            canvas.appendChild(el);
+
+            gameState.elements.push({
+                id,
+                type,
+                element: el,
+                vx,
+                vy,
+                speed: baseSpeed
+            });
+
+            if (type.harmful) {
+                setTimeout(() => {
+                    const idx = gameState.elements.findIndex(e => e.id === id);
+                    if (idx !== -1) {
+                        if (el.parentNode) el.remove();
+                        gameState.elements.splice(idx, 1);
+                    }
+                }, 6000);
+            }
+        }
+
+        function handleCorrect(el, type, info) {
+            if (type === 'amino') {
+                gameState.chain.push('🧫');
+                gameState.amino++;
+                updateProteinChain();
+            } else if (type === 'stop') {
+                gameState.stop++;
+                if (gameState.chain.length > 0) {
+                    gameState.protein++;
+                    gameState.score += 60 + gameState.chain.length * 5;
+                    showMessage(`✅ Protein tamamlandı! +${60 + gameState.chain.length * 5}`, 'success');
+                    resetChain();
+                } else {
+                    showMessage('⚠️ Önce aminoasit gerekli!', 'warning');
+                }
+            }
+
+            gameState.combo++;
+            createParticles(el, '#3498db');
+            updateUI();
+
+            if (gameState.combo >= 5) showCombo();
+        }
+
+        function handleHarmful(el, info) {
+            gameState.score = Math.max(0, gameState.score + info.points);
+            gameState.combo = 0;
+            createParticles(el, '#e74c3c');
+            showMessage(`❌ ${info.emoji} ${info.points}`, 'error');
+            document.body.classList.add('shake');
+            setTimeout(() => document.body.classList.remove('shake'), 500);
+            updateUI();
+        }
+
+        function updateProteinChain() {
+            const chainEl = document.getElementById('proteinChain');
+            chainEl.innerHTML = '';
+            gameState.chain.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'chain-item amino';
+                div.textContent = '🧫';
+                chainEl.appendChild(div);
+            });
+        }
+
+        function resetChain() {
+            gameState.chain = [];
+            document.getElementById('proteinChain').innerHTML = '';
+        }
+
+        function showCombo() {
+            const existing = document.getElementById('comboDisplay');
+            if (existing) existing.remove();
+            const combo = document.createElement('div');
+            combo.id = 'comboDisplay';
+            combo.className = 'combo-display';
+            combo.textContent = `🔥 COMBO x${gameState.combo}!`;
+            document.getElementById('gameCanvas').appendChild(combo);
+            setTimeout(() => { if (combo.parentNode) combo.remove(); }, 2000);
+        }
+
+        function createParticles(el, color) {
+            const rect = el.getBoundingClientRect();
+            const canvas = document.getElementById('gameCanvas');
+            const cRect = canvas.getBoundingClientRect();
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.backgroundColor = color;
+                p.style.left = (rect.left - cRect.left + 30) + 'px';
+                p.style.top = (rect.top - cRect.top + 30) + 'px';
+                canvas.appendChild(p);
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 5;
+                let x = parseFloat(p.style.left), y = parseFloat(p.style.top), opacity = 1;
+                const anim = () => {
+                    opacity -= 0.02;
+                    x += Math.cos(angle) * speed;
+                    y += Math.sin(angle) * speed;
+                    p.style.opacity = opacity;
+                    p.style.left = x + 'px';
+                    p.style.top = y + 'px';
+                    if (opacity > 0) requestAnimationFrame(anim);
+                    else p.remove();
+                };
+                requestAnimationFrame(anim);
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        function updateTimer() {
+            gameState.time--;
+            if (gameState.time < gameState.lastSpeedUpdate && gameState.time % 10 === 0) {
+                gameState.spawnInterval = Math.max(500, gameState.spawnInterval * 0.85);
+                clearInterval(spawnTimerId);
+                spawnTimerId = setInterval(spawnElement, gameState.spawnInterval);
+                gameState.lastSpeedUpdate = gameState.time;
+            }
+
+            const perc = (gameState.time / 45) * 100;
+            document.getElementById('timerBar').style.width = perc + '%';
+            document.getElementById('timerText').textContent = gameState.time + 's';
+
+            if (gameState.time <= 0) {
+                endGame();
+            }
+        }
+
+        let spawnTimerId = null;
+
+        function startGame() {
+            document.querySelectorAll('.element').forEach(el => el.remove());
+            
+            gameState = {
+                time: 45,
+                amino: 0,
+                stop: 0,
+                protein: 0,
+                score: 0,
+                combo: 0,
+                chain: [],
+                elements: [],
+                dragged: null,
+                spawnInterval: 1500,
+                lastSpeedUpdate: 45,
+                baseSpeed: 1.2,
+                gameActive: true,
+                audioContext: null
+            };
+            
+            clearInterval(gameState.timer);
+            clearInterval(spawnTimerId);
+            stopPhysics();
+
+            updateUI();
+            showScreen('gameScreen');
+            document.getElementById('gameCanvas').innerHTML = `
+                <div class="mrna-strip">🧬 mRNA Talimatı</div>
+                <div class="protein-chain" id="proteinChain"></div>
+                <div class="ribosome-zone" id="ribosomeZone">
+                    🧬
+                    <div class="ribo-text">RİBOZOM</div>
+                </div>
+            `;
+            startPhysics();
+            spawnElement();
+            spawnTimerId = setInterval(spawnElement, gameState.spawnInterval);
+            gameState.timer = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameState.timer);
+            clearInterval(spawnTimerId);
+            stopPhysics();
+            document.getElementById('finalProtein').textContent = gameState.protein;
+            document.getElementById('finalScore').textContent = gameState.score;
+            showScreen('endScreen');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>

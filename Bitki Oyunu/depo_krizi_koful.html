@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Koful</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+     
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 10px;
+      
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #2b8a3e;
+      /* overflow kaldırıldı */
+    }
+
+    header {
+      background: linear-gradient(135deg, #27ae60, #2ecc71, #16a085);
+      padding: 16px;
+      text-align: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 1.7em;
+      margin-bottom: 4px;
+      color: white;
+      text-shadow: 0 0 12px rgba(39, 174, 96, 0.8);
+      font-weight: 800;
+    }
+
+    header p {
+      font-size: 0.95em;
+      opacity: 0.9;
+    }
+
+    .game-area {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .board {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap; /* Mobilde sütunları aşağı alır */
+      justify-content: center;
+    }
+
+    .column {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 14px;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      min-width: 160px;
+      flex: 1; /* Esnek büyüme */
+      max-width: 320px; /* Mobilde çok geniş olmasın */
+    }
+
+    .column h3 {
+      color: #2ecc71;
+      margin-bottom: 10px;
+      font-size: 1.3em;
+      text-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+    }
+
+    .info-box {
+      background: rgba(46, 204, 113, 0.15);
+      border-left: 4px solid #2ecc71;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+
+    .info-box h4 {
+      color: #2ecc71;
+      margin-bottom: 5px;
+      font-size: 1em;
+    }
+
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 6px;
+      flex: 1;
+      max-height: 220px; /* Sabit ama uygun yükseklik */
+    }
+
+    .flow::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .flow::-webkit-scrollbar-thumb {
+      background: rgba(46, 204, 113, 0.5);
+      border-radius: 3px;
+    }
+
+    .item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      cursor: grab;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      font-weight: 600;
+    }
+
+    .item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 14px rgba(46, 204, 113, 0.4);
+    }
+
+    .item:active {
+      cursor: grabbing;
+      transform: scale(0.98);
+    }
+
+    .item-desc {
+      font-size: 0.8em;
+      opacity: 0.85;
+      color: #a8e6cf;
+    }
+
+    .koful-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .koful {
+      width: clamp(140px, 40vw, 180px);
+      height: clamp(140px, 40vw, 180px);
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #a8e6cf, #7ec0ff 60%, #4a90e2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        0 0 35px rgba(42, 138, 62, 0.6),
+        inset 0 0 25px rgba(0, 0, 0, 0.4);
+      border: 3px solid #2b8a3e;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .koful::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.2), transparent 30%);
+      animation: spin 8s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .koful .label {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #073;
+      text-shadow: 0 1px 2px white;
+    }
+
+    .koful .level {
+      font-size: 1em;
+      font-weight: bold;
+      color: #073;
+      margin-top: 6px;
+    }
+
+    .gauge-container {
+      width: 110px;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 8px;
+      border: 1px solid rgba(46, 204, 113, 0.5);
+    }
+
+    .gauge-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      transition: width 0.5s ease;
+    }
+
+    .hud {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+      max-height: 180px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95em;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat b {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+
+    #btnExpel {
+      background: linear-gradient(135deg, #8e44ad, #6c3483);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95em;
+      transition: all 0.3s;
+      box-shadow: 0 5px 18px rgba(142, 68, 173, 0.5);
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    #btnExpel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 22px rgba(142, 68, 173, 0.7);
+    }
+
+    .tip {
+      background: rgba(0, 0, 0, 0.7);
+      color: #2ecc71;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: bold;
+      font-size: 0.95em;
+      box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+      z-index: 10;
+      backdrop-filter: blur(4px);
+      border: 1px solid #2ecc71;
+      text-align: center;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(0, 0, 0, 0.85);
+      padding: 16px 24px;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #fff;
+      z-index: 999;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      animation: message-pop 0.6s ease-out forwards;
+    }
+
+    .message.success { color: #2ecc71; border: 2px solid #2ecc71; }
+    .message.warning { color: #f39c12; border: 2px solid #f39c12; }
+
+    @keyframes message-pop {
+      0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+      50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 12px;
+      color: #a8e6cf;
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+
+    /* Mobilde dikey sütun yapısı */
+    @media (max-width: 768px) {
+      .board {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .column {
+        max-width: 100%;
+        min-width: auto;
+        width: 100%;
+      }
+      .koful {
+        width: 160px;
+        height: 160px;
+      }
+      .gauge-container {
+        width: 100px;
+      }
+      header h1 {
+        font-size: 1.5em;
+      }
+      .game-area {
+        padding: 12px;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .koful {
+        width: 140px;
+        height: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>💧 Depo Krizi: Koful Görevde! 💧</h1>
+      <p>Koful olup hücreyi dengede tut. Öğretici prototip.</p>
+    </header>
+
+    <div class="game-area">
+      <div class="board">
+        <!-- Sol: Gelen maddeler -->
+        <div class="column">
+          <h3>📦 Gelen Maddeler</h3>
+          <div class="flow" id="flow"></div>
+          <div style="margin-top:6px;font-size:0.8em;color:#a8e6cf;text-align:center">
+            Sürükle veya tıkla → kofula ekle!
+          </div>
+        </div>
+
+        <!-- Orta: Koful -->
+        <div class="column koful-container">
+          <div class="tip" id="tip">Turgor: <b id="turgorVal">50</b> — Sağlık: <b id="healthVal">100</b></div>
+          <div class="koful" id="koful" draggable="false">
+            <div class="label">KOFUL</div>
+            <div class="level" id="kofulLevel">Dolu: 50%</div>
+            <div class="gauge-container">
+              <div class="gauge-fill" id="gaugeFill" style="width:50%"></div>
+            </div>
+            <div style="margin-top:6px;font-size:0.8em;color:#073;text-align:center">Su, Tuz, Şeker, Atık</div>
+          </div>
+        </div>
+
+        <!-- Sağ: HUD + Bilgi -->
+        <div class="column">
+          <h3>📊 Hücre Durumu</h3>
+          <div class="hud">
+            <div class="stat">Turgor: <b id="turgorText">50</b></div>
+            <div class="stat">Enerji: <b id="energyText">50</b></div>
+            <div class="stat">Atık: <b id="wasteText">10</b></div>
+            <div class="stat">Sağlık: <b id="healthText">100</b></div>
+          </div>
+          <button id="btnExpel">Atıkları Dışarı At 🌀</button>
+          <div class="info-box">
+            <h4>🔬 Görevler & Bilim</h4>
+            <ul style="padding-left:16px;margin-top:4px;line-height:1.4;font-size:0.85em;">
+              <li><b>Atık < 60</b> → Zehirlenme olmaz</li>
+              <li><b>Turgor 30–80</b> → Bitki dik durur</li>
+              <li><b>2 dk hayatta kal</b> → Koful dengede!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box" style="background:rgba(39,174,96,0.1);border-color:#27ae60;">
+        <h4>🌱 Koful Nedir?</h4>
+        <p style="font-size:0.85em;">Bitki hücrelerinde su, iyon ve atık depolayan büyük organel. <b>Turgor basıncını</b> sağlayarak bitkinin dik durmasını sağlar.</p>
+      </div>
+
+      <footer>
+        <small>Prototip — Eğitim amaçlıdır. Her maddeye tıklayarak etkisini öğren!</small>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      kofulFill: 50,
+      turgor: 50,
+      energy: 50,
+      waste: 10,
+      health: 100,
+      running: true,
+      lastWasteLow: false,
+      lastTurgorIdeal: false
+    };
+
+    const ITEMS = [
+      {id:'su', label:'💧 Su', effect: s => { s.kofulFill += 10; s.turgor += 12; }, desc:'Turgor basıncını artırır. Bitki dikleşir!', color:'#3498db'},
+      {id:'tuz', label:'🧂 Tuz', effect: s => { s.turgor -= 8; s.kofulFill += 4; }, desc:'Fazla tuz su dengesini bozar, turgor düşer.', color:'#f39c12'},
+      {id:'seker', label:'🍬 Şeker', effect: s => { s.energy += 18; }, desc:'Hücre enerjisi için gereklidir.', color:'#f1c40f'},
+      {id:'atik', label:'☠️ Atık', effect: s => { s.waste += 16; s.health -= 6; }, desc:'Hücreyi zehirler. Aceleyle dışarı atılmalı!', color:'#e74c3c'}
+    ];
+
+    const flow = document.getElementById('flow');
+    const gaugeFill = document.getElementById('gaugeFill');
+    const kofulLevel = document.getElementById('kofulLevel');
+    const turgorText = document.getElementById('turgorText');
+    const energyText = document.getElementById('energyText');
+    const wasteText = document.getElementById('wasteText');
+    const healthText = document.getElementById('healthText');
+    const turgorVal = document.getElementById('turgorVal');
+    const healthVal = document.getElementById('healthVal');
+
+    function showMessage(text, type = 'success') {
+      const msg = document.createElement('div');
+      msg.className = `message ${type}`;
+      msg.textContent = text;
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 2000);
+    }
+
+    function spawnItem(){
+      if(!state.running) return;
+      const type = ITEMS[Math.floor(Math.random()*ITEMS.length)];
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.draggable = true;
+      el.dataset.type = type.id;
+      el.innerHTML = `
+        <strong>${type.label}</strong>
+        <div class="item-desc">${type.desc}</div>
+      `;
+      el.style.borderColor = type.color;
+      el.style.boxShadow = `0 3px 10px ${type.color}40`;
+
+      el.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', type.id);
+        el.style.opacity = '0.7';
+      });
+
+      el.addEventListener('dragend', () => {
+        el.style.opacity = '1';
+      });
+
+      setTimeout(()=>{ if(el.parentNode) el.remove(); }, 12000);
+      flow.prepend(el);
+    }
+
+    setInterval(spawnItem, 1800);
+    for(let i=0;i<4;i++) spawnItem();
+
+    const koful = document.getElementById('koful');
+    koful.addEventListener('dragover', e => {
+      e.preventDefault();
+      koful.style.transform = 'scale(1.04)';
+      koful.style.boxShadow = '0 0 45px rgba(42,138,62,1), inset 0 0 25px rgba(0,0,0,0.4)';
+    });
+
+    koful.addEventListener('dragleave', () => {
+      koful.style.transform = 'scale(1)';
+      koful.style.boxShadow = '0 0 35px rgba(42,138,62,0.6), inset 0 0 25px rgba(0,0,0,0.4)';
+    });
+
+    koful.addEventListener('drop', e => {
+      e.preventDefault();
+      koful.style.transform = 'scale(1)';
+      koful.style.boxShadow = '0 0 35px rgba(42,138,62,0.6), inset 0 0 25px rgba(0,0,0,0.4)';
+      const type = e.dataTransfer.getData('text/plain');
+      handleDrop(type);
+    });
+
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+    function handleDrop(type){
+      const t = ITEMS.find(x=>x.id===type);
+      if(!t) return;
+      koful.animate([{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}],{duration:280});
+      t.effect(state);
+      state.kofulFill = clamp(state.kofulFill + (type==='seker'?0:4),0,100);
+      if(state.waste>70) state.health -= 0.8;
+      updateUI();
+    }
+
+    setInterval(()=>{
+      if(!state.running) return;
+      state.energy = clamp(state.energy - 0.8, 0, 150);
+      state.turgor = clamp(state.turgor - (Math.random()*0.6), 0, 150);
+      state.kofulFill = clamp(state.kofulFill - 0.3, 0, 100);
+      if(state.turgor < 25) state.health -= 0.6;
+      if(state.waste > 60) state.health -= 0.9;
+      state.health = clamp(state.health, 0, 100);
+
+      if (state.waste < 20 && !state.lastWasteLow) {
+        showMessage('✅ Atık düşük! Hücre rahat.', 'success');
+        state.lastWasteLow = true;
+      } else if (state.waste >= 20) {
+        state.lastWasteLow = false;
+      }
+
+      const idealTurgor = state.turgor >= 30 && state.turgor <= 80;
+      if (idealTurgor && !state.lastTurgorIdeal) {
+        showMessage('🌿 Turgor ideal! Bitki dik.', 'success');
+        state.lastTurgorIdeal = true;
+      } else if (!idealTurgor) {
+        state.lastTurgorIdeal = false;
+      }
+
+      updateUI();
+
+      if(state.health <= 0){
+        state.running = false;
+        alert('Hücre sağlığını kaybetti — oyun bitti. Sayfayı yenileyin.');
+      }
+    }, 1500);
+
+    document.getElementById('btnExpel').addEventListener('click', ()=>{
+      if(state.waste <= 0) return;
+      state.waste = clamp(state.waste - 28, 0, 100);
+      state.energy = clamp(state.energy - 6, 0, 150);
+      updateUI();
+      koful.animate([
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-6px)' },
+        { transform: 'translateX(6px)' },
+        { transform: 'translateX(0)' }
+      ], { duration: 350 });
+    });
+
+    function updateUI(){
+      gaugeFill.style.width = state.kofulFill + '%';
+      kofulLevel.textContent = 'Dolu: ' + Math.round(state.kofulFill) + '%';
+      turgorText.textContent = Math.round(state.turgor);
+      energyText.textContent = Math.round(state.energy);
+      wasteText.textContent = Math.round(state.waste);
+      healthText.textContent = Math.round(state.health);
+      turgorVal.textContent = Math.round(state.turgor);
+      healthVal.textContent = Math.round(state.health);
+
+      if(state.energy < 18) state.turgor = clamp(state.turgor - 2.4, 0, 150);
+      if(state.turgor > 95) state.health -= 0.7;
+
+      if(Math.random() < 0.02){
+        const msgs = [
+          'Güneş azaldı — fotosentez düştü.',
+          'Toprak kurak — su azalıyor.',
+          'Yağmur! Su artabilir.'
+        ];
+        document.getElementById('tip').textContent = msgs[Math.floor(Math.random()*msgs.length)];
+        setTimeout(()=>{
+          document.getElementById('tip').textContent = `Turgor: ${Math.round(state.turgor)} — Sağlık: ${Math.round(state.health)}`;
+        }, 2400);
+      }
+    }
+
+    flow.addEventListener('click', e => {
+      const it = e.target.closest('.item');
+      if(!it) return;
+      const type = it.dataset.type;
+      handleDrop(type);
+      it.remove();
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>

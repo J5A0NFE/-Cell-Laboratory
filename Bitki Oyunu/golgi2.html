@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚚 Golgi EkspRES – ULTRA Paketleme</title>
+    <style> 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            overflow-y: auto; 
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-radius: 20px; 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            max-width: 900px;
+            width: 98%;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #4a5568;
+            transition: all 0.3s;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8e2de2, #4a00e0);
+            padding: 15px 10px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            color: white;
+            text-shadow: 0 0 10px rgba(142, 45, 226, 0.8);
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .score-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); 
+            gap: 8px; 
+            margin-top: 10px;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 5px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-label {
+            font-size: 0.7em;
+            opacity: 0.85;
+            margin-bottom: 3px;
+        }
+
+        .score-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .game-area {
+            padding: 15px;
+            min-height: 400px; 
+            position: relative;
+        }
+
+        .screen {
+            text-align: center;
+            padding: 10px;
+            color: #e0f7ff;
+        }
+
+        h2 {
+            color: #8e2de2;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #d0e8ff;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3a7bd5, #8e2de2);
+            color: white;
+            border: none;
+            padding: 12px 25px; 
+            font-size: 1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 15px rgba(58, 123, 213, 0.5);
+            margin: 8px;
+            font-weight: 600;
+            white-space: nowrap; 
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(58, 123, 213, 0.7);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.5);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.7);
+        }
+
+        .game-canvas {
+            background: radial-gradient(circle at center, #0a192f 0%, #112240 100%);
+            border-radius: 15px;
+            padding: 10px;
+            position: relative;
+            min-height: 380px; 
+            border: 3px solid #2c3e50;
+            overflow: hidden;
+            touch-action: none; 
+        }
+
+        .entrance {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px; 
+            height: 40px;
+            background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 175, 189, 0.5);
+            font-size: 12px;
+        }
+
+        .exit-gate {
+            position: absolute;
+            width: 100px; 
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            padding: 5px;
+            cursor: default;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.3s, border 0.2s;
+        }
+
+        .exit-gate:hover {
+            border-style: solid;
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .gate-lisosom { bottom: 10px; left: 10px; }
+        .gate-zar { bottom: 10px; right: 10px; }
+        .gate-vakuol { top: 70px; left: 10px; }
+        .gate-hormon { top: 70px; right: 10px; }
+        
+        @media (min-width: 600px) {
+            .gate-lisosom { bottom: 20px; left: 60px; }
+            .gate-zar { bottom: 20px; right: 60px; }
+            .gate-vakuol { top: 120px; left: 60px; }
+            .gate-hormon { top: 120px; right: 60px; }
+            .exit-gate { width: 140px; height: 100px; font-size: 14px; }
+            .header h1 { font-size: 2.8em; }
+            .game-container { border-radius: 30px; }
+        }
+        
+        .gate-highlight {
+            border: 3px solid #ffeb3b !important;
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.8) !important;
+            transform: scale(1.1) !important;
+        }
+
+
+        .package {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            transition: transform 0.2s, box-shadow 0.2s, left 0.2s, top 0.2s;
+        }
+
+        .package:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .package.dragging {
+            cursor: grabbing;
+            opacity: 0.8;
+            transform: scale(1.15) rotate(10deg) !important;
+            z-index: 100;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .enzim { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .hormon { background: linear-gradient(135deg, #f39c12, #d35400); }
+        .salgi { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .lipid { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .atik { background: linear-gradient(135deg, #7f8c8d, #95a5a6); }
+        .bozuk { background: linear-gradient(135deg, #000, #333); }
+
+        .bomb-timer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.95);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 20;
+            animation: blink 0.5s infinite alternate;
+            border: 2px solid #fff;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            z-index: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            animation: message-pop 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        .message.success { background: #2ecc71; }
+        .message.error { background: #e74c3c; }
+        .message.warning { background: #f1c40f; color: #333; }
+
+        @keyframes message-pop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            80% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .hidden { display: none !important; }
+
+        .progress-bar {
+            margin: 10px 0;
+            height: 20px; 
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.4s, background-color 0.4s;
+        }
+        .progress-high { background: linear-gradient(90deg, #2ecc71, #3498db); }
+        .progress-mid { background: linear-gradient(90deg, #f39c12, #e67e22); }
+        .progress-low { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+
+        .shake {
+            animation: shakeScreen 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            transform: translate3d(0, 0, 0);
+            perspective: 1000px;
+        }
+        @keyframes shakeScreen {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            opacity: 1;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🚚 Golgi EkspRES – ULTRA Paketleme</h1>
+            <div class="subtitle">Canlı & Mobil Uyumlu Sürüm</div>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">⏱️ Süre</div>
+                    <div class="score-value" id="timeValue">45</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">✅ Doğru</div>
+                    <div class="score-value" id="correctCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">❌ Yanlış</div>
+                    <div class="score-value" id="wrongCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">💥 Bozuk</div>
+                    <div class="score-value" id="bombCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">🏆 Puan</div>
+                    <div class="score-value" id="scoreValue">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="startScreen" class="screen">
+                <h2>🧬 Golgi EkspRES’e Hoş Geldin!</h2>
+                <p>
+                    ER’den gelen kutular <strong>karmaşık ve yanlış!</strong><br>
+                    Senin görevin: <strong>Her kutuyu doğru kapıya göndermek.</strong>
+                </p>
+                <div class="info-box">
+                    <h3>🚪 Kapılar & Görevleri:</h3>
+                    <p>🔴 <strong>Lizosom:</strong> Sindirim enzimleri</p>
+                    <p>🔵 <strong>Hücre Zarı:</strong> Dışarı salgılanacak proteinler</p>
+                    <p>🟢 <strong>Vakuol:</strong> Depolanacak lipidler</p>
+                    <p>🟠 <strong>Gizli Hormon Kapısı:</strong> Hormonlar</p>
+                    <p>⚠️ <strong>Atık:</strong> Hücre dışına atılır (Hücre Zarı'na)</p>
+                    <p>💣 <strong>Bozuk Paket:</strong> Hemen imha et (herhangi bir yere hızlıca at)!</p>
+                </div>
+                <button class="btn" onclick="startGame()">Paketleme Başlasın! 🚚</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Golgi Hakkında</button>
+            </div>
+
+            <div id="infoScreen" class="screen hidden">
+                <h2>🧠 Golgi Aparatı Nedir?</h2>
+                <div class="info-box">
+                    <ul>
+                        <li>📦 Proteinleri <strong>paketler</strong> ve <strong>etiketler</strong></li>
+                        <li>🧱 Lizosom enzimlerini Golgi üretir</li>
+                        <li>🌊 Salgı maddeleri hücre dışına buradan gider</li>
+                        <li>🔋 Depolanacak maddeler vakuole yönlendirilir</li>
+                        <li>⚠️ Yanlış yönlendirme = Hücre hastalığı</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="showScreen('startScreen')">Geri Dön</button>
+            </div>
+
+            <div id="gameScreen" class="screen hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill progress-high" id="timerBar">
+                        <span id="timerText">45s</span>
+                    </div>
+                </div>
+                <div class="game-canvas" id="gameCanvas">
+                    <div class="entrance">📍 ER Gönderiyor</div>
+                    <div class="exit-gate gate-lisosom" data-gate="lisosom">Lizosom<br><small>🧬 Enzim</small></div>
+                    <div class="exit-gate gate-zar" data-gate="zar">Hücre Zarı<br><small>🌊 Salgı</small></div>
+                    <div class="exit-gate gate-vakuol" data-gate="vakuol">Vakuol<br><small>🛢️ Lipid</small></div>
+                    <div class="exit-gate gate-hormon" data-gate="hormon">Hormon<br><small>⚠️ Gizli</small></div>
+                </div>
+            </div>
+
+            <div id="endScreen" class="screen hidden">
+                <h2>🎉 Görev Tamamlandı!</h2>
+                <p style="font-size: 1.3em;">GOLGİ EKSPRES — Kargo teslim edildi! Hücre sana minnettar.</p>
+                <div class="final-score">
+                    <span id="finalScore">0</span> 📦
+                </div>
+                <div class="info-box">
+                    <p><strong>🌟 Bilgi:</strong> Gerçek hücrelerde Golgi, her dakika binlerce paketi doğru adrese gönderir. Sen de bu sistemi tecrübe ettin!</p>
+                </div>
+                <button class="btn" onclick="restartGame()">Tekrar Oyna! 🔁</button>
+                <button class="btn btn-secondary" onclick="showInfo()">Daha Fazla Öğren 📚</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            time: 45, 
+            score: 0,
+            correct: 0,
+            wrong: 0,
+            bombs: 0,
+            packages: [],
+            dragged: null,
+            interval: null,
+            timer: null,
+            alarmActive: false,
+            superMode: false,
+            superModeTimer: null,
+            consecutiveCorrect: 0,
+            zarQueue: 0,
+            audioContext: null
+        };
+
+        const packageTypes = [
+            { type: 'enzim', gate: 'lisosom', emoji: '🧬', points: 10 },
+            { type: 'hormon', gate: 'hormon', emoji: '⚡', points: 15 },
+            { type: 'salgi', gate: 'zar', emoji: '🌊', points: 10 },
+            { type: 'lipid', gate: 'vakuol', emoji: '🛢️', points: 10 },
+            { type: 'atik', gate: 'zar', emoji: '🗑️', points: 5 },
+            { type: 'bozuk', gate: 'none', emoji: '💣', points: -20, isBomb: true }
+        ];
+        function initAudio() {
+            if (!gameState.audioContext) {
+                try {
+                    gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.error("AudioContext başlatılamadı:", e);
+                }
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.audioContext || gameState.audioContext.state === 'suspended') {
+                if (gameState.audioContext) gameState.audioContext.resume();
+                else return;
+            }
+            const ctx = gameState.audioContext;
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            switch (type) {
+                case 'correct':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.2);
+                    break;
+                case 'wrong':
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(220, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.3);
+                    break;
+                case 'explode':
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(100, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.8);
+                    break;
+                case 'alarm':
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            const tempOsc = ctx.createOscillator();
+                            const tempGain = ctx.createGain();
+                            tempOsc.connect(tempGain);
+                            tempGain.connect(ctx.destination);
+                            tempOsc.type = 'sine';
+                            tempOsc.frequency.setValueAtTime(880, ctx.currentTime);
+                            tempGain.gain.setValueAtTime(0.3, ctx.currentTime);
+                            tempGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                            tempOsc.start();
+                            tempOsc.stop(ctx.currentTime + 0.2);
+                        }, i * 300);
+                    }
+                    break;
+                case 'super':
+                    oscillator.type = 'sine';
+                    for (let i = 0; i < 5; i++) {
+                        oscillator.frequency.setValueAtTime(440 + i * 100, ctx.currentTime + i * 0.1);
+                    }
+                    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.8);
+                    break;
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('timeValue').textContent = gameState.time;
+            document.getElementById('correctCount').textContent = gameState.correct;
+            document.getElementById('wrongCount').textContent = gameState.wrong;
+            document.getElementById('bombCount').textContent = gameState.bombs;
+            document.getElementById('scoreValue').textContent = gameState.score;
+        }
+
+        function showScreen(id) {
+            ['startScreen', 'infoScreen', 'gameScreen', 'endScreen'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function showInfo() { showScreen('infoScreen'); }
+
+        function startGame() {
+            gameState = {
+                time: 45, 
+                score: 0,
+                correct: 0,
+                wrong: 0,
+                bombs: 0,
+                packages: [],
+                dragged: null,
+                alarmActive: false,
+                superMode: false,
+                consecutiveCorrect: 0,
+                zarQueue: 0,
+                audioContext: gameState.audioContext 
+            };
+            updateUI();
+            showScreen('gameScreen');
+            const gameCanvas = document.getElementById('gameCanvas');
+            gameCanvas.innerHTML = `
+                <div class="entrance">📍 ER Gönderiyor</div>
+                <div class="exit-gate gate-lisosom" data-gate="lisosom">Lizosom<br><small>🧬 Enzim</small></div>
+                <div class="exit-gate gate-zar" data-gate="zar">Hücre Zarı<br><small>🌊 Salgı</small></div>
+                <div class="exit-gate gate-vakuol" data-gate="vakuol">Vakuol<br><small>🛢️ Lipid</small></div>
+                <div class="exit-gate gate-hormon" data-gate="hormon">Hormon<br><small>⚠️ Gizli</small></div>
+            `;
+            initAudio();
+            setupDragAndDrop(); 
+            spawnPackage();
+            gameState.interval = setInterval(spawnPackage, 1800);
+            gameState.timer = setInterval(updateTimer, 1000);
+        }
+
+        function spawnPackage() {
+            const type = packageTypes[Math.floor(Math.random() * packageTypes.length)];
+            const pkg = document.createElement('div');
+            const id = 'pkg_' + Date.now();
+            pkg.id = id;
+            pkg.className = `package ${type.type}`;
+            pkg.textContent = type.emoji;
+            pkg.dataset.type = type.type;
+            pkg.dataset.gate = type.gate;
+            pkg.draggable = true;
+
+            const canvas = document.getElementById('gameCanvas');
+            const padding = window.innerWidth < 600 ? 20 : 60;
+            const pkgWidth = 50; 
+            const maxX = canvas.offsetWidth - padding * 2 - pkgWidth; 
+            const y = 60 + Math.random() * 100;
+            let newLeft = padding + Math.random() * maxX;
+            pkg.style.left = newLeft + 'px';
+            pkg.style.top = y + 'px';
+
+            pkg.style.transform = `rotate(${Math.random() * 20 - 10}deg) scale(0.8)`;
+            setTimeout(() => {
+                pkg.style.transition = 'transform 0.5s';
+                pkg.style.transform = 'rotate(0deg) scale(1)';
+            }, 50);
+
+            canvas.appendChild(pkg);
+            gameState.packages.push({ id, type, element: pkg });
+
+            if (type.gate === 'zar' && !type.isBomb) {
+                gameState.zarQueue++;
+                checkZarAlarm();
+            }
+
+            if (type.isBomb) {
+                const bombTimer = document.createElement('div');
+                bombTimer.className = 'bomb-timer';
+                bombTimer.textContent = '3';
+                bombTimer.id = 'timer_' + id;
+                pkg.appendChild(bombTimer);
+
+                let sec = 3;
+                const bombInterval = setInterval(() => {
+                    sec--;
+                    bombTimer.textContent = sec;
+                    if (sec <= 0) {
+                        clearInterval(bombInterval);
+                        if (pkg.parentNode) {
+                            explodeBomb(pkg);
+                        }
+                    }
+                }, 1000);
+                pkg.bombInterval = bombInterval;
+            }
+        }
+        function setupDragAndDrop() {
+            const canvas = document.getElementById('gameCanvas');
+            canvas.removeEventListener('mousedown', handleStart);
+            canvas.removeEventListener('touchstart', handleStart);
+            document.removeEventListener('mousemove', handleMove);
+            document.removeEventListener('touchmove', handleMove);
+            document.removeEventListener('mouseup', handleEnd);
+            document.removeEventListener('touchend', handleEnd);
+             canvas.addEventListener('mousedown', handleStart);
+            canvas.addEventListener('touchstart', handleStart, { passive: false });
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('touchmove', handleMove, { passive: false });
+            document.addEventListener('mouseup', handleEnd);
+            document.addEventListener('touchend', handleEnd);
+        }
+
+        function handleStart(e) {
+            const target = e.target.closest('.package');
+            if (!target) return;
+
+            e.preventDefault(); 
+            gameState.dragged = target;
+            target.classList.add('dragging');
+            const rect = target.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            target.startX = clientX - rect.left;
+            target.startY = clientY - rect.top;
+            highlightGates(target.dataset.gate);
+        }
+
+        function handleMove(e) {
+            if (!gameState.dragged) return;
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const dragged = gameState.dragged;
+            const canvas = document.getElementById('gameCanvas');
+            const canvasRect = canvas.getBoundingClientRect();
+            let newLeft = clientX - canvasRect.left - dragged.startX;
+            let newTop = clientY - canvasRect.top - dragged.startY;
+            newLeft = Math.max(0, Math.min(newLeft, canvas.offsetWidth - dragged.offsetWidth));
+            newTop = Math.max(0, Math.min(newTop, canvas.offsetHeight - dragged.offsetHeight));
+            dragged.style.left = newLeft + 'px';
+            dragged.style.top = newTop + 'px';
+        }
+
+        function handleEnd(e) {
+            if (!gameState.dragged) return;
+            const dragged = gameState.dragged;
+            dragged.classList.remove('dragging');           
+            clearHighlightGates(); 
+            const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+            const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+            const targetElement = document.elementFromPoint(clientX, clientY);
+            const targetGate = targetElement ? targetElement.closest('.exit-gate') : null;
+
+            const pkgType = dragged.dataset.type;
+            const pkgInfo = packageTypes.find(p => p.type === pkgType);
+
+            if (targetGate) {
+                const gateId = targetGate.dataset.gate;
+                const correct = pkgInfo.gate === gateId;
+
+                if (pkgInfo.isBomb) {
+                    handleBombDefuse(dragged);
+                } else if (correct) {
+                    handleCorrect(dragged, pkgInfo);
+                } else {
+                    handleWrong(dragged, gateId);
+                }
+
+                if ((pkgInfo.gate === 'zar' || pkgInfo.type === 'atik') && !pkgInfo.isBomb) {
+                    gameState.zarQueue--;
+                    if (gameState.zarQueue <= 0) {
+                        clearAlarm();
+                    }
+                }
+            } else {
+                dragged.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                setTimeout(() => {
+                    dragged.style.transform = 'translateX(10px) rotate(5deg)';
+                    setTimeout(() => {
+                        dragged.style.transform = 'translateX(-10px) rotate(-5deg)';
+                        setTimeout(() => {
+                            dragged.style.transform = 'translateX(0px) rotate(0deg)';
+                        }, 100);
+                    }, 100);
+                }, 10);
+                
+                showMessage('⚠️ Paketi Kapıya Bırak!', 'warning');
+            }
+
+            gameState.dragged = null;
+        }
+
+        function highlightGates(correctGate) {
+            document.querySelectorAll('.exit-gate').forEach(gate => {
+                if (gate.dataset.gate === correctGate) {
+                    gate.classList.add('gate-highlight');
+                } else if (correctGate === 'none') {
+                    gate.classList.add('gate-highlight');
+                }
+            });
+        }
+
+        function clearHighlightGates() {
+            document.querySelectorAll('.exit-gate').forEach(gate => {
+                gate.classList.remove('gate-highlight');
+            });
+        }
+        
+        function handleCorrect(pkg, info) {
+            gameState.correct++;
+            gameState.score += info.points;
+            gameState.consecutiveCorrect++;
+            playSound('correct');
+            showMessage('✅ Doğru! +'+info.points, 'success');
+            createParticles(pkg, '#2ecc71');
+
+            pkg.remove();
+            removePackage(pkg.id);
+
+            if (gameState.consecutiveCorrect >= 10 && !gameState.superMode) {
+                activateSuperMode();
+            }
+
+            updateUI();
+        }
+
+        function handleWrong(pkg, target) {
+            gameState.wrong++;
+            gameState.score = Math.max(0, gameState.score - 5);
+            gameState.consecutiveCorrect = 0;
+            playSound('wrong');
+
+            if (target === 'lisosom' && pkg.dataset.type !== 'enzim') {
+                lizozomAnger(); 
+            }
+
+            showMessage('❌ Yanlış! -5 Puan', 'error');
+            createParticles(pkg, '#e74c3c');
+            pkg.remove();
+            removePackage(pkg.id);
+            updateUI();
+        }
+        
+        function handleBombDefuse(pkg) {
+             clearInterval(pkg.bombInterval);
+             gameState.bombs++;
+             gameState.score += 15;
+             showMessage('💥 BOMBA İMHA EDİLDİ! +15', 'success');
+             createParticles(pkg, '#ffeb3b');
+             pkg.remove();
+             removePackage(pkg.id);
+             updateUI();
+        }
+
+        function explodeBomb(pkg) {
+            clearInterval(pkg.bombInterval);
+            gameState.wrong++;
+            gameState.score = Math.max(0, gameState.score - 20);
+            gameState.consecutiveCorrect = 0;
+            playSound('explode');
+            showMessage('💣 BOZUK PAKET PATLADI! -20', 'error');
+            
+            document.body.classList.add('shake');
+            setTimeout(() => {
+                document.body.classList.remove('shake');
+            }, 500);
+
+            createParticles(pkg, '#000000');
+            
+            pkg.remove();
+            removePackage(pkg.id);
+            updateUI();
+        }
+        function lizozomAnger() {
+            showMessage('😡 LIZOZOM: "Yanlış kutu! Her şey karıştı!"', 'warning');
+            document.body.classList.add('shake');
+            setTimeout(() => {
+                document.body.classList.remove('shake');
+            }, 500);
+            const canvas = document.getElementById('gameCanvas');
+            document.querySelectorAll('.package').forEach(p => {
+                p.style.transition = 'left 0.5s, top 0.5s, transform 0.5s';
+                p.style.left = Math.random() * (canvas.offsetWidth - 80) + 'px';
+                p.style.top = Math.random() * 200 + 100 + 'px';
+                p.style.transform = `rotate(${Math.random() * 360}deg)`;
+                setTimeout(() => p.style.transition = 'transform 0.2s', 500);
+            });
+        }
+        
+        function checkZarAlarm() {
+            if (gameState.zarQueue > 5 && !gameState.alarmActive) {
+                gameState.alarmActive = true;
+                playSound('alarm');
+                showMessage('🚨 HÜCRE ZARI SIKIŞTI! Hızlı Ol!', 'warning');
+            }
+        }
+
+        function clearAlarm() {
+            if (gameState.alarmActive) {
+                gameState.alarmActive = false;
+                showMessage('✔️ Hücre Zarı Rahatladı!', 'success');
+            }
+        }
+
+        function activateSuperMode() {
+            gameState.superMode = true;
+            gameState.score += 50;
+            playSound('super');
+            showMessage('🚀 SÜPER MOD! +50 Puan!', 'success');
+            document.body.style.boxShadow = '0 0 50px #ffeb3b';
+            
+            gameState.superModeTimer = setTimeout(() => {
+                gameState.superMode = false;
+                document.body.style.boxShadow = 'none';
+                showMessage('⏳ Süper Mod Bitti!', 'warning');
+                gameState.consecutiveCorrect = 0;
+            }, 10000); 
+        }
+
+        function createParticles(element, color) {
+            const rect = element.getBoundingClientRect();
+            const canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
+            const count = 15;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.background = color;
+                p.style.left = (rect.left + rect.width / 2 - canvasRect.left) + 'px';
+                p.style.top = (rect.top + rect.height / 2 - canvasRect.top) + 'px';
+                
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 50 + 20;
+                const duration = Math.random() * 0.8 + 0.5;
+
+                const finalX = parseFloat(p.style.left) + distance * Math.cos(angle * Math.PI / 180);
+                const finalY = parseFloat(p.style.top) + distance * Math.sin(angle * Math.PI / 180);
+
+                document.getElementById('gameCanvas').appendChild(p);
+                let start;
+                const animate = (timestamp) => {
+                    if (!start) start = timestamp;
+                    const elapsed = timestamp - start;
+                    const progress = elapsed / (duration * 1000);
+
+                    if (progress < 1) {
+                        p.style.opacity = 1 - progress;
+                        p.style.transform = `translate(${finalX * progress}px, ${finalY * progress}px) scale(${1 - progress * 0.5})`;
+                        requestAnimationFrame(animate);
+                    } else {
+                        p.remove();
+                    }
+                };
+                requestAnimationFrame(animate);
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 2000);
+        }
+
+        function removePackage(id) {
+            gameState.packages = gameState.packages.filter(p => p.id !== id);
+        }
+
+        function updateTimer() {
+            gameState.time--;
+            const perc = (gameState.time / 45) * 100;
+            const timerBar = document.getElementById('timerBar');
+
+            timerBar.style.width = perc + '%';
+            document.getElementById('timerText').textContent = gameState.time + 's';
+            timerBar.classList.remove('progress-high', 'progress-mid', 'progress-low');
+            if (perc > 60) {
+                timerBar.classList.add('progress-high');
+            } else if (perc > 20) {
+                timerBar.classList.add('progress-mid');
+            } else {
+                timerBar.classList.add('progress-low');
+                if (gameState.time <= 5) {
+                    timerBar.style.animation = 'blink 0.5s infinite alternate';
+                } else {
+                    timerBar.style.animation = 'none';
+                }
+            }
+
+            if (gameState.time <= 0) {
+                endGame();
+            }
+
+            updateUI();
+        }
+
+        function endGame() {
+            clearInterval(gameState.interval);
+            clearInterval(gameState.timer);
+            if (gameState.superModeTimer) clearTimeout(gameState.superModeTimer);
+            gameState.packages.forEach(p => {
+                if (p.element.bombInterval) clearInterval(p.element.bombInterval);
+            });
+
+            document.getElementById('finalScore').textContent = gameState.score;
+            showScreen('endScreen');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        window.onload = () => {
+             updateUI();
+             setupDragAndDrop(); 
+        };
+    </script>
+</body>
+</html>
