@@ -18,3 +18,5 @@ Cell Laboratory is a web app to learn biological structures in a fun and interac
 - Etkileşimli öğrenme modülleri  
 - Seviye atlama sistemi  
 - Görsel içerikler
+## Canlı Demo / Live Demo
+[Hücre Laboratuvarı'na Git](https://icell.icodeflow.com/)
